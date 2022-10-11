@@ -1,4 +1,5 @@
-import { Token, TokenType } from './token';
+import { error } from '..';
+import { Token, TokenType, keywords } from './token';
 
 export class Scanner {
   private source: string;
@@ -91,6 +92,27 @@ export class Scanner {
           this.match('=') ? TokenType.GREATER_EQUAL : TokenType.GREATER
         );
         break;
+      case '/':
+        if (this.match('/')) {
+          // A comment goes until the end of tle line
+          while (this.peek() !== '\n' && !this.isAtEnd()) {
+            this.advance();
+          }
+        } else {
+          this.addToken(TokenType.SLASH);
+        }
+        break;
+      case '"':
+        this.string();
+        break;
+      default:
+        if (this.isDigit(c)) {
+          this.number();
+        } else if (this.isAlpha(c)) {
+          this.identifier();
+        } else {
+          error(this.line, `Unexpected character: ${c}`);
+        }
     }
   }
 
@@ -143,5 +165,55 @@ export class Scanner {
 
   private isAlphaNumeric(c: string): boolean {
     return this.isAlpha(c) || this.isDigit(c);
+  }
+
+  private string() {
+    while (this.peek() !== '"' && !this.isAtEnd()) {
+      if (this.peek() == '\n') {
+        this.line++;
+      }
+
+      this.advance();
+    }
+
+    if (this.isAtEnd()) {
+      error(this.line, 'Unterminates string');
+      return;
+    }
+
+    // Skip the closing quote
+    this.advance();
+
+    // Trim the surrounding quotes.
+    const literal = this.source.substring(this.start + 1, this.current - 1);
+    this.addToken(TokenType.STRING, literal);
+  }
+
+  private number() {
+    while (this.isDigit(this.peek())) {
+      this.advance();
+    }
+
+    if (this.peek() === '.' && this.isDigit(this.peekNext())) {
+      this.advance();
+    }
+
+    while (this.isDigit(this.peek())) {
+      this.advance();
+    }
+
+    this.addToken(
+      TokenType.NUMBER,
+      Number.parseFloat(this.source.substring(this.start, this.current))
+    );
+  }
+
+  private identifier() {
+    while (this.isAlphaNumeric(this.peek())) {
+      this.advance();
+    }
+
+    const lexeme = this.source.substring(this.start, this.current);
+    this.addToken(keywords.get(lexeme) ?? TokenType.IDENTIFIER);
   }
 }
