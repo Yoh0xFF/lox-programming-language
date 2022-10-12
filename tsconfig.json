@@ -8,6 +8,7 @@
     /* Modules */
     "module": "commonjs",
     "rootDir": "src",
+    "baseUrl": "src",
     "resolveJsonModule": true,
     /* JavaScript Support */
     "allowJs": true,
@@ -20,6 +21,6 @@
     "strict": true,
     "noImplicitAny": true,
     /* Completeness */
-    "skipLibCheck": true
+    "skipLibCheck": true,
   }
 }

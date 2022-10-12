@@ -1,5 +1,5 @@
-import { error } from '..';
-import { Token, TokenType, keywords } from './token';
+import { error } from 'index';
+import { Token, TokenType, keywords } from 'scanner/token';
 
 export class Scanner {
   private source: string;
