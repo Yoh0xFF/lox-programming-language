@@ -1,5 +1,6 @@
 import { readFileSync } from 'fs';
 import readline from 'readline';
+import { Token, TokenType } from 'scanner/token';
 
 import { Scanner } from './scanner/scanner';
 
@@ -7,7 +8,7 @@ const args = process.argv.slice(2);
 console.log(args);
 
 if (args.length > 1) {
-  console.log('Usage: jlox [script]');
+  console.log('Usage: lox [script]');
   process.exit(64);
 }
 
@@ -22,6 +23,10 @@ if (args.length === 1) {
 function runFile(path: string) {
   const content = readFileSync(path).toString();
   run(content);
+
+  if (hadError) {
+    process.exit(65);
+  }
 }
 
 function runPrompt() {
@@ -53,6 +58,14 @@ function run(source: string) {
 
 export function error(line: number, message: string) {
   report(line, '', message);
+}
+
+export function reportParserError(token: Token, message: string) {
+  if (token.type == TokenType.EOF) {
+    report(token.line, ' at end', message);
+  } else {
+    report(token.line, ` at '${token.lexeme}'`, message);
+  }
 }
 
 export function report(line: number, where: string, message: string) {
