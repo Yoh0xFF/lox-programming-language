@@ -6,15 +6,7 @@ export interface Expr {
 }
 
 export class BinaryExpr implements Expr {
-  leftExpr: Expr;
-  operator: Token;
-  rightExpr: Expr;
-
-  constructor(left: Expr, operator: Token, right: Expr) {
-    this.leftExpr = left;
-    this.operator = operator;
-    this.rightExpr = right;
-  }
+  constructor(public left: Expr, public operator: Token, public right: Expr) {}
 
   accept<R>(visitor: Visitor<R>): R {
     throw new Error('Method not implemented.');
@@ -22,13 +14,7 @@ export class BinaryExpr implements Expr {
 }
 
 export class UnaryExpr implements Expr {
-  operator: Token;
-  rightExpr: Expr;
-
-  constructor(right: Expr, operator: Token) {
-    this.rightExpr = right;
-    this.operator = operator;
-  }
+  constructor(public right: Expr, public operator: Token) {}
 
   accept<R>(visitor: Visitor<R>): R {
     throw new Error('Method not implemented.');
@@ -36,9 +22,7 @@ export class UnaryExpr implements Expr {
 }
 
 export class GroupingExpr implements Expr {
-  expr: Expr;
-
-  constructor(expr: Expr) {
+  constructor(public expr: Expr) {
     this.expr = expr;
   }
 
@@ -48,9 +32,7 @@ export class GroupingExpr implements Expr {
 }
 
 export class LiteralExpr implements Expr {
-  value: any;
-
-  constructor(value: any) {
+  constructor(public value: any) {
     this.value = value;
   }
 
