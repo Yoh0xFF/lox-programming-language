@@ -1,4 +1,6 @@
 import { readFileSync } from 'fs';
+import { AstPrinter } from 'parser/ast-printer';
+import { Parser } from 'parser/parser';
 import readline from 'readline';
 import { Token, TokenType } from 'scanner/token';
 
@@ -53,7 +55,15 @@ function runPrompt() {
 function run(source: string) {
   const scanner = new Scanner(source);
   const tokens = scanner.scanTokens();
-  tokens.forEach((x) => console.log(x));
+  // tokens.forEach((x) => console.log(x));
+
+  const parser = new Parser(tokens);
+  const expr = parser.parse();
+  if (expr == null || hadError) {
+    return;
+  }
+
+  console.log(new AstPrinter().print(expr));
 }
 
 export function error(line: number, message: string) {

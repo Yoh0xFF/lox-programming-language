@@ -9,15 +9,15 @@ export class BinaryExpr implements Expr {
   constructor(public left: Expr, public operator: Token, public right: Expr) {}
 
   accept<R>(visitor: Visitor<R>): R {
-    throw new Error('Method not implemented.');
+    return visitor.visitBinaryExpr(this);
   }
 }
 
 export class UnaryExpr implements Expr {
-  constructor(public right: Expr, public operator: Token) {}
+  constructor(public operator: Token, public right: Expr) {}
 
   accept<R>(visitor: Visitor<R>): R {
-    throw new Error('Method not implemented.');
+    return visitor.visitUnaryExpr(this);
   }
 }
 
@@ -27,7 +27,7 @@ export class GroupingExpr implements Expr {
   }
 
   accept<R>(visitor: Visitor<R>): R {
-    throw new Error('Method not implemented.');
+    return visitor.visitGroupingExpr(this);
   }
 }
 
@@ -37,6 +37,6 @@ export class LiteralExpr implements Expr {
   }
 
   accept<R>(visitor: Visitor<R>): R {
-    throw new Error('Method not implemented.');
+    return visitor.visitLiteralExpr(this);
   }
 }
