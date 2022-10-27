@@ -60,6 +60,7 @@ function run(source: string) {
   const parser = new Parser(tokens);
   const expr = parser.parse();
   if (expr == null || hadError) {
+    hadError = false;
     return;
   }
 
