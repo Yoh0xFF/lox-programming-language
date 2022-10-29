@@ -1,4 +1,5 @@
 import { readFileSync } from 'fs';
+import { Interpreter, RuntimeError } from 'interpreter/interpreter';
 import { AstPrinter } from 'parser/ast-printer';
 import { Parser } from 'parser/parser';
 import readline from 'readline';
@@ -14,7 +15,9 @@ if (args.length > 1) {
   process.exit(64);
 }
 
+const interpreter = new Interpreter();
 let hadError = false;
+let hadRuntimeError = false;
 
 if (args.length === 1) {
   runFile(args[0]);
@@ -28,6 +31,9 @@ function runFile(path: string) {
 
   if (hadError) {
     process.exit(65);
+  }
+  if (hadRuntimeError) {
+    process.exit(70);
   }
 }
 
@@ -45,6 +51,9 @@ function runPrompt() {
 
       run(line);
 
+      hadError = false;
+      hadRuntimeError = false;
+
       reader.prompt();
     })
     .on('close', function () {
@@ -59,12 +68,12 @@ function run(source: string) {
 
   const parser = new Parser(tokens);
   const expr = parser.parse();
-  if (expr == null || hadError) {
-    hadError = false;
+  if (hadError || expr == null) {
     return;
   }
+  // console.log(new AstPrinter().print(expr));
 
-  console.log(new AstPrinter().print(expr));
+  interpreter.interpret(expr);
 }
 
 export function error(line: number, message: string) {
@@ -77,6 +86,11 @@ export function reportParserError(token: Token, message: string) {
   } else {
     report(token.line, ` at '${token.lexeme}'`, message);
   }
+}
+
+export function reportRuntimeError(error: RuntimeError) {
+  console.log(`${error.message} + "\n[line " + ${error.token.line} + "]"`);
+  hadRuntimeError = true;
 }
 
 export function report(line: number, where: string, message: string) {

@@ -15,7 +15,9 @@ export class Parser {
     try {
       return this.expression();
     } catch (error) {
-      console.log(error);
+      if (!(error instanceof ParseError)) {
+        console.error(error);
+      }
       return null;
     }
   }
