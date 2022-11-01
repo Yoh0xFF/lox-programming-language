@@ -67,13 +67,13 @@ function run(source: string) {
   // tokens.forEach((x) => console.log(x));
 
   const parser = new Parser(tokens);
-  const expr = parser.parse();
-  if (hadError || expr == null) {
+  const statements = parser.parse();
+  if (hadError) {
     return;
   }
   // console.log(new AstPrinter().print(expr));
 
-  interpreter.interpret(expr);
+  interpreter.interpret(statements);
 }
 
 export function error(line: number, message: string) {

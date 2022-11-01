@@ -6,20 +6,52 @@ import {
   LiteralExpr,
   UnaryExpr,
 } from 'parser/expr';
+import { ExpressionStmt, PrintStmt, Stmt } from 'parser/stmt';
 import { Token, TokenType } from 'scanner/token';
 
 export class Parser {
   constructor(private tokens: Token[] = [], private current: number = 0) {}
 
-  parse(): Expr | null {
-    try {
-      return this.expression();
-    } catch (error) {
-      if (!(error instanceof ParseError)) {
-        console.error(error);
-      }
-      return null;
+  parse(): Stmt[] {
+    const statements: Stmt[] = [];
+
+    while (!this.isAtEnd()) {
+      statements.push(this.statement());
     }
+
+    return statements;
+    // try {
+    //   return this.expression();
+    // } catch (error) {
+    //   if (!(error instanceof ParseError)) {
+    //     console.error(error);
+    //   }
+    //   return null;
+    // }
+  }
+
+  private statement(): Stmt {
+    if (this.match(TokenType.PRINT)) {
+      return this.printStatement();
+    }
+
+    return this.expressionStatement();
+  }
+
+  private printStatement(): Stmt {
+    const value = this.expression();
+
+    this.consume(TokenType.SEMICOLON, 'Expect ";" after value.');
+
+    return new PrintStmt(value);
+  }
+
+  private expressionStatement(): Stmt {
+    const expr = this.expression();
+
+    this.consume(TokenType.SEMICOLON, 'Expect ";" after expression.');
+
+    return new ExpressionStmt(expr);
   }
 
   private expression(): Expr {

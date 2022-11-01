@@ -6,20 +6,38 @@ import {
   LiteralExpr,
   UnaryExpr,
 } from 'parser/expr';
-import { Visitor } from 'parser/visitor';
+import { ExpressionStmt, PrintStmt, Stmt, VarStmt } from 'parser/stmt';
+import { ExprVisitor, StmtVisitor } from 'parser/visitor';
 import { Token, TokenType } from 'scanner/token';
 
-export class Interpreter implements Visitor<any> {
-  interpret(expr: Expr) {
+export class Interpreter implements StmtVisitor<void>, ExprVisitor<any> {
+  interpret(statements: Stmt[]) {
     try {
-      const value = this.evaluate(expr);
-      console.log(JSON.stringify(value));
+      for (const statement of statements) {
+        this.execute(statement);
+      }
+      // const value = this.evaluate(expr);
+      // console.log(JSON.stringify(value));
     } catch (error) {
       if (error instanceof RuntimeError) {
         reportRuntimeError(error);
+      } else {
+        console.error(error);
       }
-      console.error(error);
     }
+  }
+
+  visitExpressionStmt(stmt: ExpressionStmt): void {
+    this.evaluate(stmt.expression);
+  }
+
+  visitVarStmt(stmt: VarStmt): void {
+    throw new Error('Method not implemented.');
+  }
+
+  visitPrintStmt(stmt: PrintStmt): void {
+    const value = this.evaluate(stmt.expression);
+    console.log(JSON.stringify(value));
   }
 
   visitBinaryExpr(expr: BinaryExpr): any {
@@ -88,6 +106,10 @@ export class Interpreter implements Visitor<any> {
 
   visitLiteralExpr(expr: LiteralExpr): any {
     return expr.value;
+  }
+
+  private execute(stmt: Stmt): void {
+    stmt.accept(this);
   }
 
   private evaluate(expr: Expr): any {

@@ -1,14 +1,14 @@
-import { Visitor } from 'parser/visitor';
+import { ExprVisitor } from 'parser/visitor';
 import { Token } from 'scanner/token';
 
 export interface Expr {
-  accept<R>(visitor: Visitor<R>): R;
+  accept<R>(visitor: ExprVisitor<R>): R;
 }
 
 export class BinaryExpr implements Expr {
   constructor(public left: Expr, public operator: Token, public right: Expr) {}
 
-  accept<R>(visitor: Visitor<R>): R {
+  accept<R>(visitor: ExprVisitor<R>): R {
     return visitor.visitBinaryExpr(this);
   }
 }
@@ -16,7 +16,7 @@ export class BinaryExpr implements Expr {
 export class UnaryExpr implements Expr {
   constructor(public operator: Token, public right: Expr) {}
 
-  accept<R>(visitor: Visitor<R>): R {
+  accept<R>(visitor: ExprVisitor<R>): R {
     return visitor.visitUnaryExpr(this);
   }
 }
@@ -26,7 +26,7 @@ export class GroupingExpr implements Expr {
     this.expr = expr;
   }
 
-  accept<R>(visitor: Visitor<R>): R {
+  accept<R>(visitor: ExprVisitor<R>): R {
     return visitor.visitGroupingExpr(this);
   }
 }
@@ -36,7 +36,7 @@ export class LiteralExpr implements Expr {
     this.value = value;
   }
 
-  accept<R>(visitor: Visitor<R>): R {
+  accept<R>(visitor: ExprVisitor<R>): R {
     return visitor.visitLiteralExpr(this);
   }
 }

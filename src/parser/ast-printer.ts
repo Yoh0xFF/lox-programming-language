@@ -5,9 +5,9 @@ import {
   LiteralExpr,
   UnaryExpr,
 } from 'parser/expr';
-import { Visitor } from 'parser/visitor';
+import { ExprVisitor } from 'parser/visitor';
 
-export class AstPrinter implements Visitor<string> {
+export class AstPrinter implements ExprVisitor<string> {
   print(expr: Expr): string {
     return expr.accept(this);
   }
