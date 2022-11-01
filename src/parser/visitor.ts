@@ -2,14 +2,14 @@ import { BinaryExpr, GroupingExpr, LiteralExpr, UnaryExpr } from 'parser/expr';
 import { ExpressionStmt, PrintStmt, VarStmt } from 'parser/stmt';
 
 export interface StmtVisitor<R> {
-  visitExpressionStmt(stmt: ExpressionStmt): R;
-  visitVarStmt(stmt: VarStmt): R;
-  visitPrintStmt(stmt: PrintStmt): R;
+  visitExpressionStmt(statement: ExpressionStmt): R;
+  visitVarStmt(statement: VarStmt): R;
+  visitPrintStmt(statement: PrintStmt): R;
 }
 
 export interface ExprVisitor<R> {
-  visitBinaryExpr(expr: BinaryExpr): R;
-  visitUnaryExpr(expr: UnaryExpr): R;
-  visitGroupingExpr(expr: GroupingExpr): R;
-  visitLiteralExpr(expr: LiteralExpr): R;
+  visitBinaryExpr(expression: BinaryExpr): R;
+  visitUnaryExpr(expression: UnaryExpr): R;
+  visitGroupingExpr(expression: GroupingExpr): R;
+  visitLiteralExpr(expression: LiteralExpr): R;
 }

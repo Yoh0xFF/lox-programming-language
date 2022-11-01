@@ -16,7 +16,7 @@ export class Interpreter implements StmtVisitor<void>, ExprVisitor<any> {
       for (const statement of statements) {
         this.execute(statement);
       }
-      // const value = this.evaluate(expr);
+      // const value = this.evaluate(expression);
       // console.log(JSON.stringify(value));
     } catch (error) {
       if (error instanceof RuntimeError) {
@@ -40,29 +40,29 @@ export class Interpreter implements StmtVisitor<void>, ExprVisitor<any> {
     console.log(JSON.stringify(value));
   }
 
-  visitBinaryExpr(expr: BinaryExpr): any {
-    const left = this.evaluate(expr.left);
-    const right = this.evaluate(expr.right);
+  visitBinaryExpr(expression: BinaryExpr): any {
+    const left = this.evaluate(expression.left);
+    const right = this.evaluate(expression.right);
 
-    switch (expr.operator.type) {
+    switch (expression.operator.type) {
       case TokenType.BANG_EQUAL:
         return !this.isEqual(left, right);
       case TokenType.EQUAL_EQUAL:
         return this.isEqual(left, right);
       case TokenType.GREATER:
-        this.checkNumberOperands(expr.operator, left, right);
+        this.checkNumberOperands(expression.operator, left, right);
         return Number(left) > Number(right);
       case TokenType.GREATER_EQUAL:
-        this.checkNumberOperands(expr.operator, left, right);
+        this.checkNumberOperands(expression.operator, left, right);
         return Number(left) >= Number(right);
       case TokenType.LESS:
-        this.checkNumberOperands(expr.operator, left, right);
+        this.checkNumberOperands(expression.operator, left, right);
         return Number(left) < Number(right);
       case TokenType.LESS_EQUAL:
-        this.checkNumberOperands(expr.operator, left, right);
+        this.checkNumberOperands(expression.operator, left, right);
         return Number(left) <= Number(right);
       case TokenType.MINUS:
-        this.checkNumberOperands(expr.operator, left, right);
+        this.checkNumberOperands(expression.operator, left, right);
         return Number(left) - Number(right);
       case TokenType.PLUS:
         if (this.isNumber(left) && this.isNumber(right)) {
@@ -72,48 +72,48 @@ export class Interpreter implements StmtVisitor<void>, ExprVisitor<any> {
           return String(left) + String(right);
         }
         throw new RuntimeError(
-          expr.operator,
+          expression.operator,
           'Operands must be two numbers or two strings.'
         );
       case TokenType.SLASH:
-        this.checkNumberOperands(expr.operator, left, right);
+        this.checkNumberOperands(expression.operator, left, right);
         return Number(left) / Number(right);
       case TokenType.STAR:
-        this.checkNumberOperands(expr.operator, left, right);
+        this.checkNumberOperands(expression.operator, left, right);
         return Number(left) * Number(right);
     }
 
     return null;
   }
 
-  visitUnaryExpr(expr: UnaryExpr): any {
-    const right = this.evaluate(expr.right);
+  visitUnaryExpr(expression: UnaryExpr): any {
+    const right = this.evaluate(expression.right);
 
-    switch (expr.operator.type) {
+    switch (expression.operator.type) {
       case TokenType.BANG:
         return !this.isTruthy(right);
       case TokenType.MINUS:
-        this.checkNumberOperands(expr.operator, right);
+        this.checkNumberOperands(expression.operator, right);
         return -1 * Number(right);
     }
 
     return null;
   }
 
-  visitGroupingExpr(expr: GroupingExpr): any {
-    return this.evaluate(expr.expr);
+  visitGroupingExpr(expression: GroupingExpr): any {
+    return this.evaluate(expression.expression);
   }
 
-  visitLiteralExpr(expr: LiteralExpr): any {
-    return expr.value;
+  visitLiteralExpr(expression: LiteralExpr): any {
+    return expression.value;
   }
 
-  private execute(stmt: Stmt): void {
-    stmt.accept(this);
+  private execute(statement: Stmt): void {
+    statement.accept(this);
   }
 
-  private evaluate(expr: Expr): any {
-    return expr.accept(this);
+  private evaluate(statement: Expr): any {
+    return statement.accept(this);
   }
 
   private isTruthy(right: any): boolean {

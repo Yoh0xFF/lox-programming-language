@@ -8,14 +8,14 @@ import {
 import { ExprVisitor } from 'parser/visitor';
 
 export class AstPrinter implements ExprVisitor<string> {
-  print(expr: Expr): string {
-    return expr.accept(this);
+  print(expression: Expr): string {
+    return expression.accept(this);
   }
 
-  private parenthesize(name: string, ...exprs: Expr[]): string {
+  private parenthesize(name: string, ...expressions: Expr[]): string {
     let result = `(${name}`;
 
-    exprs.forEach((x) => {
+    expressions.forEach((x) => {
       result = `${result} ${x.accept(this)}`;
     });
 
@@ -23,22 +23,26 @@ export class AstPrinter implements ExprVisitor<string> {
     return result;
   }
 
-  visitBinaryExpr(expr: BinaryExpr): string {
-    return this.parenthesize(expr.operator.lexeme, expr.left, expr.right);
+  visitBinaryExpr(expression: BinaryExpr): string {
+    return this.parenthesize(
+      expression.operator.lexeme,
+      expression.left,
+      expression.right
+    );
   }
 
-  visitUnaryExpr(expr: UnaryExpr): string {
-    return this.parenthesize(expr.operator.lexeme, expr.right);
+  visitUnaryExpr(expression: UnaryExpr): string {
+    return this.parenthesize(expression.operator.lexeme, expression.right);
   }
 
-  visitGroupingExpr(expr: GroupingExpr): string {
-    return this.parenthesize('group', expr.expr);
+  visitGroupingExpr(expression: GroupingExpr): string {
+    return this.parenthesize('group', expression.expression);
   }
 
-  visitLiteralExpr(expr: LiteralExpr): string {
-    if (expr.value == null) {
+  visitLiteralExpr(expression: LiteralExpr): string {
+    if (expression.value == null) {
       return 'nil';
     }
-    return expr.value.toString();
+    return expression.value.toString();
   }
 }

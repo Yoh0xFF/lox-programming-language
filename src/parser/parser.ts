@@ -47,11 +47,11 @@ export class Parser {
   }
 
   private expressionStatement(): Stmt {
-    const expr = this.expression();
+    const expression = this.expression();
 
     this.consume(TokenType.SEMICOLON, 'Expect ";" after expression.');
 
-    return new ExpressionStmt(expr);
+    return new ExpressionStmt(expression);
   }
 
   private expression(): Expr {
@@ -59,19 +59,19 @@ export class Parser {
   }
 
   private equality(): Expr {
-    let expr = this.comparison();
+    let expression = this.comparison();
 
     while (this.match(TokenType.BANG_EQUAL, TokenType.EQUAL_EQUAL)) {
       const operator = this.previous();
       const right = this.comparison();
-      expr = new BinaryExpr(expr, operator, right);
+      expression = new BinaryExpr(expression, operator, right);
     }
 
-    return expr;
+    return expression;
   }
 
   private comparison(): Expr {
-    let expr = this.term();
+    let expression = this.term();
 
     while (
       this.match(
@@ -83,34 +83,34 @@ export class Parser {
     ) {
       const operator = this.previous();
       const right = this.term();
-      expr = new BinaryExpr(expr, operator, right);
+      expression = new BinaryExpr(expression, operator, right);
     }
 
-    return expr;
+    return expression;
   }
 
   private term(): Expr {
-    let expr = this.factor();
+    let expression = this.factor();
 
     while (this.match(TokenType.MINUS, TokenType.PLUS)) {
       const operator = this.previous();
       const right = this.factor();
-      expr = new BinaryExpr(expr, operator, right);
+      expression = new BinaryExpr(expression, operator, right);
     }
 
-    return expr;
+    return expression;
   }
 
   private factor(): Expr {
-    let expr = this.unary();
+    let expression = this.unary();
 
     while (this.match(TokenType.SLASH, TokenType.STAR)) {
       const operator = this.previous();
       const right = this.unary();
-      expr = new BinaryExpr(expr, operator, right);
+      expression = new BinaryExpr(expression, operator, right);
     }
 
-    return expr;
+    return expression;
   }
 
   private unary(): Expr {
@@ -137,9 +137,9 @@ export class Parser {
       return new LiteralExpr(this.previous().literal);
     }
     if (this.match(TokenType.LEFT_PAREN)) {
-      const expr = this.expression();
+      const expression = this.expression();
       this.consume(TokenType.RIGHT_PAREN, 'Expected ")" after expression.');
-      return new GroupingExpr(expr);
+      return new GroupingExpr(expression);
     }
     throw this.error(this.peek(), 'Expect expression.');
   }
