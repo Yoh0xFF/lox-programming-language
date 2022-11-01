@@ -1,3 +1,4 @@
+import { RuntimeError } from 'error';
 import { reportRuntimeError } from 'index';
 import {
   BinaryExpr,
@@ -5,6 +6,7 @@ import {
   GroupingExpr,
   LiteralExpr,
   UnaryExpr,
+  VariableExpr,
 } from 'parser/expr';
 import { ExpressionStmt, PrintStmt, Stmt, VarStmt } from 'parser/stmt';
 import { ExprVisitor, StmtVisitor } from 'parser/visitor';
@@ -108,6 +110,10 @@ export class Interpreter implements StmtVisitor<void>, ExprVisitor<any> {
     return expression.value;
   }
 
+  visitVariableExpr(expression: VariableExpr): any {
+    return 'nil'; // TODO add implementation
+  }
+
   private execute(statement: Stmt): void {
     statement.accept(this);
   }
@@ -157,8 +163,4 @@ export class Interpreter implements StmtVisitor<void>, ExprVisitor<any> {
   private isString(value: any): boolean {
     return typeof value === 'string' || value instanceof String;
   }
-}
-
-export class RuntimeError {
-  constructor(public token: Token, public message: String) {}
 }

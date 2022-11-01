@@ -1,6 +1,6 @@
+import { RuntimeError } from 'error';
 import { readFileSync } from 'fs';
-import { Interpreter, RuntimeError } from 'interpreter/interpreter';
-import { AstPrinter } from 'parser/ast-printer';
+import { Interpreter } from 'interpreter/interpreter';
 import { Parser } from 'parser/parser';
 import readline from 'readline';
 import { Token, TokenType } from 'scanner/token';

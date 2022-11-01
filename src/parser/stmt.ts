@@ -15,7 +15,7 @@ export class ExpressionStmt implements Stmt {
 }
 
 export class VarStmt implements Stmt {
-  constructor(public name: Token, public initializer: Expr) {}
+  constructor(public name: Token, public initializer: Expr | null) {}
 
   accept<R>(visitor: StmtVisitor<R>): R {
     return visitor.visitVarStmt(this);

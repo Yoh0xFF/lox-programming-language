@@ -1,3 +1,4 @@
+import { ParseError } from 'error';
 import { reportParserError } from 'index';
 import {
   BinaryExpr,
@@ -5,8 +6,9 @@ import {
   GroupingExpr,
   LiteralExpr,
   UnaryExpr,
+  VariableExpr,
 } from 'parser/expr';
-import { ExpressionStmt, PrintStmt, Stmt } from 'parser/stmt';
+import { ExpressionStmt, PrintStmt, Stmt, VarStmt } from 'parser/stmt';
 import { Token, TokenType } from 'scanner/token';
 
 export class Parser {
@@ -16,18 +18,43 @@ export class Parser {
     const statements: Stmt[] = [];
 
     while (!this.isAtEnd()) {
-      statements.push(this.statement());
+      const statement = this.declaration();
+
+      if (statement != null) {
+        statements.push(statement);
+      }
     }
 
     return statements;
-    // try {
-    //   return this.expression();
-    // } catch (error) {
-    //   if (!(error instanceof ParseError)) {
-    //     console.error(error);
-    //   }
-    //   return null;
-    // }
+  }
+
+  private declaration(): Stmt | null {
+    try {
+      if (this.match(TokenType.VAR)) {
+        return this.varDeclaration();
+      }
+
+      return this.statement();
+    } catch (error) {
+      if (error instanceof ParseError) {
+        this.synchronize();
+      } else {
+        console.error(error);
+      }
+      return null;
+    }
+  }
+
+  private varDeclaration(): Stmt {
+    const name = this.consume(TokenType.IDENTIFIER, 'Expect variable name.');
+
+    let initializer: Expr | null = null;
+    if (this.match(TokenType.EQUAL)) {
+      initializer = this.expression();
+    }
+
+    this.consume(TokenType.SEMICOLON, 'Expect ";" after variable declaration.');
+    return new VarStmt(name, initializer);
   }
 
   private statement(): Stmt {
@@ -136,6 +163,9 @@ export class Parser {
     if (this.match(TokenType.NUMBER, TokenType.STRING)) {
       return new LiteralExpr(this.previous().literal);
     }
+    if (this.match(TokenType.IDENTIFIER)) {
+      return new VariableExpr(this.previous().literal);
+    }
     if (this.match(TokenType.LEFT_PAREN)) {
       const expression = this.expression();
       this.consume(TokenType.RIGHT_PAREN, 'Expected ")" after expression.');
@@ -218,5 +248,3 @@ export class Parser {
     return new ParseError();
   }
 }
-
-export class ParseError {}

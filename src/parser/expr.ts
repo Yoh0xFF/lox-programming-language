@@ -32,11 +32,17 @@ export class GroupingExpr implements Expr {
 }
 
 export class LiteralExpr implements Expr {
-  constructor(public value: any) {
-    this.value = value;
-  }
+  constructor(public value: any) {}
 
   accept<R>(visitor: ExprVisitor<R>): R {
     return visitor.visitLiteralExpr(this);
+  }
+}
+
+export class VariableExpr implements Expr {
+  constructor(public name: Token) {}
+
+  accept<R>(visitor: ExprVisitor<R>): R {
+    return visitor.visitVariableExpr(this);
   }
 }
