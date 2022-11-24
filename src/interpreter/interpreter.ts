@@ -1,5 +1,6 @@
 import { RuntimeError } from 'error';
 import { reportRuntimeError } from 'index';
+import { Environment } from 'interpreter/environment';
 import {
   BinaryExpr,
   Expr,
@@ -13,6 +14,8 @@ import { ExprVisitor, StmtVisitor } from 'parser/visitor';
 import { Token, TokenType } from 'scanner/token';
 
 export class Interpreter implements StmtVisitor<void>, ExprVisitor<any> {
+  private environment = new Environment();
+
   interpret(statements: Stmt[]) {
     try {
       for (const statement of statements) {
@@ -34,7 +37,13 @@ export class Interpreter implements StmtVisitor<void>, ExprVisitor<any> {
   }
 
   visitVarStmt(stmt: VarStmt): void {
-    throw new Error('Method not implemented.');
+    let value = null;
+
+    if (stmt.initializer != null) {
+      value = this.evaluate(stmt.initializer);
+    }
+
+    this.environment.define(stmt.name.lexeme, value);
   }
 
   visitPrintStmt(stmt: PrintStmt): void {
@@ -111,7 +120,7 @@ export class Interpreter implements StmtVisitor<void>, ExprVisitor<any> {
   }
 
   visitVariableExpr(expression: VariableExpr): any {
-    return 'nil'; // TODO add implementation
+    return this.environment.get(expression.name);
   }
 
   private execute(statement: Stmt): void {

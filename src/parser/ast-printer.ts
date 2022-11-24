@@ -4,6 +4,7 @@ import {
   GroupingExpr,
   LiteralExpr,
   UnaryExpr,
+  VariableExpr,
 } from 'parser/expr';
 import { ExprVisitor } from 'parser/visitor';
 
@@ -44,5 +45,9 @@ export class AstPrinter implements ExprVisitor<string> {
       return 'nil';
     }
     return expression.value.toString();
+  }
+
+  visitVariableExpr(expression: VariableExpr): string {
+    return expression.name.lexeme;
   }
 }

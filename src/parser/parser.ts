@@ -164,7 +164,7 @@ export class Parser {
       return new LiteralExpr(this.previous().literal);
     }
     if (this.match(TokenType.IDENTIFIER)) {
-      return new VariableExpr(this.previous().literal);
+      return new VariableExpr(this.previous());
     }
     if (this.match(TokenType.LEFT_PAREN)) {
       const expression = this.expression();
