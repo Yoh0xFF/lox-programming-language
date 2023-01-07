@@ -6,6 +6,14 @@ export interface Stmt {
   accept<R>(visitor: StmtVisitor<R>): R;
 }
 
+export class BlockStmt implements Stmt {
+  constructor(public statements: Stmt[]) {}
+
+  accept<R>(visitor: StmtVisitor<R>): R {
+    return visitor.visitBlockStmt(this);
+  }
+}
+
 export class ExpressionStmt implements Stmt {
   constructor(public expression: Expr) {}
 

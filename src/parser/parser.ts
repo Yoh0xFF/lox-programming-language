@@ -1,6 +1,7 @@
 import { ParseError } from 'error';
 import { reportParserError } from 'index';
 import {
+  AssignExpr,
   BinaryExpr,
   Expr,
   GroupingExpr,
@@ -8,7 +9,13 @@ import {
   UnaryExpr,
   VariableExpr,
 } from 'parser/expr';
-import { ExpressionStmt, PrintStmt, Stmt, VarStmt } from 'parser/stmt';
+import {
+  BlockStmt,
+  ExpressionStmt,
+  PrintStmt,
+  Stmt,
+  VarStmt,
+} from 'parser/stmt';
 import { Token, TokenType } from 'scanner/token';
 
 export class Parser {
@@ -61,6 +68,9 @@ export class Parser {
     if (this.match(TokenType.PRINT)) {
       return this.printStatement();
     }
+    if (this.match(TokenType.LEFT_BRACE)) {
+      return this.blockStatement();
+    }
 
     return this.expressionStatement();
   }
@@ -73,6 +83,21 @@ export class Parser {
     return new PrintStmt(value);
   }
 
+  private blockStatement(): Stmt {
+    var statements: Stmt[] = [];
+
+    while (!this.check(TokenType.RIGHT_BRACE) && !this.isAtEnd()) {
+      const statement = this.declaration();
+      if (statement) {
+        statements.push(statement);
+      }
+    }
+
+    this.consume(TokenType.RIGHT_BRACE, 'Expect "}" after block.');
+
+    return new BlockStmt(statements);
+  }
+
   private expressionStatement(): Stmt {
     const expression = this.expression();
 
@@ -82,7 +107,25 @@ export class Parser {
   }
 
   private expression(): Expr {
-    return this.equality();
+    return this.assignment();
+  }
+
+  private assignment(): Expr {
+    const expr = this.equality();
+
+    if (this.match(TokenType.EQUAL)) {
+      const equals = this.previous();
+      const value = this.assignment();
+
+      if (expr instanceof VariableExpr) {
+        const name = (expr as VariableExpr).name;
+        return new AssignExpr(name, value);
+      }
+
+      this.error(equals, 'Invalid assignment target.');
+    }
+
+    return expr;
   }
 
   private equality(): Expr {

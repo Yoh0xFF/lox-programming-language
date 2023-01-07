@@ -8,7 +8,8 @@ import {
 } from 'parser/expr';
 import { ExprVisitor } from 'parser/visitor';
 
-export class AstPrinter implements ExprVisitor<string> {
+export class AstPrinter /*implements ExprVisitor<string>*/ {
+  /*
   print(expression: Expr): string {
     return expression.accept(this);
   }
@@ -50,4 +51,5 @@ export class AstPrinter implements ExprVisitor<string> {
   visitVariableExpr(expression: VariableExpr): string {
     return expression.name.lexeme;
   }
+  */
 }

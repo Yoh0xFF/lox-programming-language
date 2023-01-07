@@ -2,6 +2,7 @@ import { RuntimeError } from 'error';
 import { reportRuntimeError } from 'index';
 import { Environment } from 'interpreter/environment';
 import {
+  AssignExpr,
   BinaryExpr,
   Expr,
   GroupingExpr,
@@ -9,7 +10,13 @@ import {
   UnaryExpr,
   VariableExpr,
 } from 'parser/expr';
-import { ExpressionStmt, PrintStmt, Stmt, VarStmt } from 'parser/stmt';
+import {
+  BlockStmt,
+  ExpressionStmt,
+  PrintStmt,
+  Stmt,
+  VarStmt,
+} from 'parser/stmt';
 import { ExprVisitor, StmtVisitor } from 'parser/visitor';
 import { Token, TokenType } from 'scanner/token';
 
@@ -32,6 +39,10 @@ export class Interpreter implements StmtVisitor<void>, ExprVisitor<any> {
     }
   }
 
+  visitBlockStmt(statement: BlockStmt): void {
+    this.executeBlock(statement.statements, new Environment(this.environment));
+  }
+
   visitExpressionStmt(stmt: ExpressionStmt): void {
     this.evaluate(stmt.expression);
   }
@@ -49,6 +60,12 @@ export class Interpreter implements StmtVisitor<void>, ExprVisitor<any> {
   visitPrintStmt(stmt: PrintStmt): void {
     const value = this.evaluate(stmt.expression);
     console.log(JSON.stringify(value));
+  }
+
+  visitAssignExpr(expression: AssignExpr): any {
+    const value = this.evaluate(expression.value);
+    this.environment.assign(expression.name, value);
+    return value;
   }
 
   visitBinaryExpr(expression: BinaryExpr): any {
@@ -125,6 +142,19 @@ export class Interpreter implements StmtVisitor<void>, ExprVisitor<any> {
 
   private execute(statement: Stmt): void {
     statement.accept(this);
+  }
+
+  private executeBlock(statements: Stmt[], environment: Environment): void {
+    const previous = this.environment;
+    try {
+      this.environment = environment;
+
+      for (const statement of statements) {
+        this.execute(statement);
+      }
+    } finally {
+      this.environment = previous;
+    }
   }
 
   private evaluate(statement: Expr): any {

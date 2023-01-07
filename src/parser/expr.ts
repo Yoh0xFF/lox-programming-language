@@ -5,6 +5,14 @@ export interface Expr {
   accept<R>(visitor: ExprVisitor<R>): R;
 }
 
+export class AssignExpr implements Expr {
+  constructor(public name: Token, public value: Expr) {}
+
+  accept<R>(visitor: ExprVisitor<R>): R {
+    return visitor.visitAssignExpr(this);
+  }
+}
+
 export class BinaryExpr implements Expr {
   constructor(public left: Expr, public operator: Token, public right: Expr) {}
 
