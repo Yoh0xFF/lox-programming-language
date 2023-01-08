@@ -12,6 +12,7 @@ import {
 import {
   BlockStmt,
   ExpressionStmt,
+  IfStmt,
   PrintStmt,
   Stmt,
   VarStmt,
@@ -35,7 +36,7 @@ export class Parser {
     return statements;
   }
 
-  private declaration(): Stmt | null {
+  private declaration(): Stmt | undefined {
     try {
       if (this.match(TokenType.VAR)) {
         return this.varDeclaration();
@@ -48,14 +49,14 @@ export class Parser {
       } else {
         console.error(error);
       }
-      return null;
+      return undefined;
     }
   }
 
   private varDeclaration(): Stmt {
     const name = this.consume(TokenType.IDENTIFIER, 'Expect variable name.');
 
-    let initializer: Expr | null = null;
+    let initializer: Expr | undefined = undefined;
     if (this.match(TokenType.EQUAL)) {
       initializer = this.expression();
     }
@@ -70,6 +71,9 @@ export class Parser {
     }
     if (this.match(TokenType.LEFT_BRACE)) {
       return this.blockStatement();
+    }
+    if (this.match(TokenType.IF)) {
+      return this.ifStatement();
     }
 
     return this.expressionStatement();
@@ -96,6 +100,20 @@ export class Parser {
     this.consume(TokenType.RIGHT_BRACE, 'Expect "}" after block.');
 
     return new BlockStmt(statements);
+  }
+
+  private ifStatement(): Stmt {
+    this.consume(TokenType.LEFT_PAREN, 'Expect "(" after "if".');
+    const condition = this.expression();
+    this.consume(TokenType.RIGHT_PAREN, 'Expect ")" after if condition');
+
+    const thenBranch = this.statement();
+    let elseBranch = undefined;
+    if (this.match(TokenType.ELSE)) {
+      elseBranch = this.statement();
+    }
+
+    return new IfStmt(condition, thenBranch, elseBranch);
   }
 
   private expressionStatement(): Stmt {

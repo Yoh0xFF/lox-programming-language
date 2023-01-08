@@ -13,6 +13,7 @@ import {
 import {
   BlockStmt,
   ExpressionStmt,
+  IfStmt,
   PrintStmt,
   Stmt,
   VarStmt,
@@ -39,16 +40,12 @@ export class Interpreter implements StmtVisitor<void>, ExprVisitor<any> {
     }
   }
 
-  visitBlockStmt(statement: BlockStmt): void {
-    this.executeBlock(statement.statements, new Environment(this.environment));
-  }
-
   visitExpressionStmt(stmt: ExpressionStmt): void {
     this.evaluate(stmt.expression);
   }
 
   visitVarStmt(stmt: VarStmt): void {
-    let value = null;
+    let value = undefined;
 
     if (stmt.initializer != null) {
       value = this.evaluate(stmt.initializer);
@@ -60,6 +57,18 @@ export class Interpreter implements StmtVisitor<void>, ExprVisitor<any> {
   visitPrintStmt(stmt: PrintStmt): void {
     const value = this.evaluate(stmt.expression);
     console.log(JSON.stringify(value));
+  }
+
+  visitBlockStmt(statement: BlockStmt): void {
+    this.executeBlock(statement.statements, new Environment(this.environment));
+  }
+
+  visitIfStmt(statement: IfStmt): void {
+    if (this.isTruthy(this.evaluate(statement.condition))) {
+      this.execute(statement.thenBranch);
+    } else if (statement.elseBranch != null) {
+      this.execute(statement.elseBranch);
+    }
   }
 
   visitAssignExpr(expression: AssignExpr): any {

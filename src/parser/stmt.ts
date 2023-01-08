@@ -23,10 +23,22 @@ export class ExpressionStmt implements Stmt {
 }
 
 export class VarStmt implements Stmt {
-  constructor(public name: Token, public initializer: Expr | null) {}
+  constructor(public name: Token, public initializer?: Expr) {}
 
   accept<R>(visitor: StmtVisitor<R>): R {
     return visitor.visitVarStmt(this);
+  }
+}
+
+export class IfStmt implements Stmt {
+  constructor(
+    public condition: Expr,
+    public thenBranch: Stmt,
+    public elseBranch?: Stmt
+  ) {}
+
+  accept<R>(visitor: StmtVisitor<R>): R {
+    return visitor.visitIfStmt(this);
   }
 }
 

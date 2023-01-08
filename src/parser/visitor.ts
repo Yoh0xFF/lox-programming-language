@@ -6,13 +6,20 @@ import {
   UnaryExpr,
   VariableExpr,
 } from 'parser/expr';
-import { BlockStmt, ExpressionStmt, PrintStmt, VarStmt } from 'parser/stmt';
+import {
+  BlockStmt,
+  ExpressionStmt,
+  IfStmt,
+  PrintStmt,
+  VarStmt,
+} from 'parser/stmt';
 
 export interface StmtVisitor<R> {
   visitBlockStmt(statement: BlockStmt): R;
   visitExpressionStmt(statement: ExpressionStmt): R;
   visitVarStmt(statement: VarStmt): R;
   visitPrintStmt(statement: PrintStmt): R;
+  visitIfStmt(statement: IfStmt): R;
 }
 
 export interface ExprVisitor<R> {
