@@ -13,6 +13,7 @@ import {
   IfStmt,
   PrintStmt,
   VarStmt,
+  WhileStmt,
 } from 'parser/stmt';
 
 export interface StmtVisitor<R> {
@@ -21,6 +22,7 @@ export interface StmtVisitor<R> {
   visitVarStmt(statement: VarStmt): R;
   visitPrintStmt(statement: PrintStmt): R;
   visitIfStmt(statement: IfStmt): R;
+  visitWhileStmt(statement: WhileStmt): R;
 }
 
 export interface ExprVisitor<R> {

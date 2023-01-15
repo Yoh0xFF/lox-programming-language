@@ -17,6 +17,7 @@ import {
   PrintStmt,
   Stmt,
   VarStmt,
+  WhileStmt,
 } from 'parser/stmt';
 import { Token, TokenType } from 'scanner/token';
 
@@ -76,6 +77,9 @@ export class Parser {
     if (this.match(TokenType.IF)) {
       return this.ifStatement();
     }
+    if (this.match(TokenType.WHILE)) {
+      return this.whileStatement();
+    }
 
     return this.expressionStatement();
   }
@@ -115,6 +119,15 @@ export class Parser {
     }
 
     return new IfStmt(condition, thenBranch, elseBranch);
+  }
+
+  private whileStatement(): Stmt {
+    this.consume(TokenType.LEFT_PAREN, 'Expect "(" after "while".');
+    const condition = this.expression();
+    this.consume(TokenType.RIGHT_PAREN, 'Expect ")" after condition.');
+    const body = this.statement();
+
+    return new WhileStmt(condition, body);
   }
 
   private expressionStatement(): Stmt {

@@ -49,3 +49,11 @@ export class PrintStmt implements Stmt {
     return visitor.visitPrintStmt(this);
   }
 }
+
+export class WhileStmt implements Stmt {
+  constructor(public condition: Expr, public body: Stmt) {}
+
+  accept<R>(visitor: StmtVisitor<R>): R {
+    return visitor.visitWhileStmt(this);
+  }
+}

@@ -18,6 +18,7 @@ import {
   PrintStmt,
   Stmt,
   VarStmt,
+  WhileStmt,
 } from 'parser/stmt';
 import { ExprVisitor, StmtVisitor } from 'parser/visitor';
 import { Token, TokenType } from 'scanner/token';
@@ -69,6 +70,14 @@ export class Interpreter implements StmtVisitor<void>, ExprVisitor<any> {
       this.execute(statement.thenBranch);
     } else if (statement.elseBranch != null) {
       this.execute(statement.elseBranch);
+    }
+  }
+
+  visitWhileStmt(statement: WhileStmt): void {
+    const { condition, body } = statement;
+
+    while (this.isTruthy(this.evaluate(condition))) {
+      this.execute(body);
     }
   }
 
