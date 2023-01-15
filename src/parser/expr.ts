@@ -54,3 +54,11 @@ export class VariableExpr implements Expr {
     return visitor.visitVariableExpr(this);
   }
 }
+
+export class LogicalExpr implements Expr {
+  constructor(public left: Expr, public operator: Token, public right: Expr) {}
+
+  accept<R>(visitor: ExprVisitor<R>): R {
+    return visitor.visitLogicalExpr(this);
+  }
+}

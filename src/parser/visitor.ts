@@ -3,6 +3,7 @@ import {
   BinaryExpr,
   GroupingExpr,
   LiteralExpr,
+  LogicalExpr,
   UnaryExpr,
   VariableExpr,
 } from 'parser/expr';
@@ -29,4 +30,5 @@ export interface ExprVisitor<R> {
   visitGroupingExpr(expression: GroupingExpr): R;
   visitLiteralExpr(expression: LiteralExpr): R;
   visitVariableExpr(expression: VariableExpr): R;
+  visitLogicalExpr(expression: LogicalExpr): R;
 }

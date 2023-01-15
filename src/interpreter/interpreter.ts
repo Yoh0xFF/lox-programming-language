@@ -7,6 +7,7 @@ import {
   Expr,
   GroupingExpr,
   LiteralExpr,
+  LogicalExpr,
   UnaryExpr,
   VariableExpr,
 } from 'parser/expr';
@@ -149,6 +150,22 @@ export class Interpreter implements StmtVisitor<void>, ExprVisitor<any> {
     return this.environment.get(expression.name);
   }
 
+  visitLogicalExpr(expression: LogicalExpr): any {
+    const left = this.evaluate(expression.left);
+
+    if (expression.operator.type === TokenType.OR) {
+      if (this.isTruthy(left)) {
+        return left;
+      }
+    } else {
+      if (!this.isTruthy(left)) {
+        return left;
+      }
+    }
+
+    return this.evaluate(expression.right);
+  }
+
   private execute(statement: Stmt): void {
     statement.accept(this);
   }
@@ -174,7 +191,7 @@ export class Interpreter implements StmtVisitor<void>, ExprVisitor<any> {
     if (right == null) {
       return false;
     }
-    if (right instanceof Boolean) {
+    if (typeof right === 'boolean' || right instanceof Boolean) {
       return Boolean(right);
     }
     return true;
