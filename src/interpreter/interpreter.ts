@@ -1,5 +1,4 @@
 import { RuntimeError } from 'error';
-import { reportRuntimeError } from 'index';
 import { Environment } from 'interpreter/environment';
 import {
   AssignExpr,
@@ -26,19 +25,20 @@ import { Token, TokenType } from 'scanner/token';
 export class Interpreter implements StmtVisitor<void>, ExprVisitor<any> {
   private environment = new Environment();
 
-  interpret(statements: Stmt[]) {
+  interpret(statements: Stmt[]): boolean {
     try {
       for (const statement of statements) {
         this.execute(statement);
       }
-      // const value = this.evaluate(expression);
-      // console.log(JSON.stringify(value));
+
+      return true;
     } catch (error) {
       if (error instanceof RuntimeError) {
-        reportRuntimeError(error);
+        this.reportRuntimeError(error);
       } else {
         console.error(error);
       }
+      return false;
     }
   }
 
@@ -236,5 +236,9 @@ export class Interpreter implements StmtVisitor<void>, ExprVisitor<any> {
 
   private isString(value: any): boolean {
     return typeof value === 'string' || value instanceof String;
+  }
+
+  private reportRuntimeError(error: RuntimeError) {
+    console.log(`${error.message} -> [line ${error.token.line}]`);
   }
 }

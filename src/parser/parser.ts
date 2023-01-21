@@ -1,5 +1,4 @@
 import { ParseError } from 'error';
-import { reportParserError } from 'index';
 import {
   AssignExpr,
   BinaryExpr,
@@ -22,7 +21,11 @@ import {
 import { Token, TokenType } from 'scanner/token';
 
 export class Parser {
-  constructor(private tokens: Token[] = [], private current: number = 0) {}
+  constructor(
+    private tokens: Token[] = [],
+    private current: number = 0,
+    public hadError = false
+  ) {}
 
   parse(): Stmt[] {
     const statements: Stmt[] = [];
@@ -80,6 +83,9 @@ export class Parser {
     if (this.match(TokenType.WHILE)) {
       return this.whileStatement();
     }
+    if (this.match(TokenType.FOR)) {
+      return this.forStatement();
+    }
 
     return this.expressionStatement();
   }
@@ -128,6 +134,48 @@ export class Parser {
     const body = this.statement();
 
     return new WhileStmt(condition, body);
+  }
+
+  private forStatement(): Stmt {
+    this.consume(TokenType.LEFT_PAREN, 'Expect "(" after "for".');
+
+    let initializer;
+    if (this.match(TokenType.SEMICOLON)) {
+      initializer = undefined;
+    } else if (this.match(TokenType.VAR)) {
+      initializer = this.varDeclaration();
+    } else {
+      initializer = this.expressionStatement();
+    }
+
+    let condition = undefined;
+    if (!this.check(TokenType.SEMICOLON)) {
+      condition = this.expression();
+    }
+    this.consume(TokenType.SEMICOLON, 'Expect ";" after loop condition.');
+
+    let increment = undefined;
+    if (!this.check(TokenType.RIGHT_PAREN)) {
+      increment = this.expression();
+    }
+    this.consume(TokenType.RIGHT_PAREN, 'Expect ")" after for clauses.');
+
+    let body = this.statement();
+
+    if (increment != null) {
+      body = new BlockStmt([body, new ExpressionStmt(increment)]);
+    }
+
+    if (condition == null) {
+      condition = new LiteralExpr(true);
+    }
+    body = new WhileStmt(condition, body);
+
+    if (initializer != null) {
+      body = new BlockStmt([initializer, body]);
+    }
+
+    return body;
   }
 
   private expressionStatement(): Stmt {
@@ -343,7 +391,28 @@ export class Parser {
   }
 
   private error(token: Token, message: string): ParseError {
-    reportParserError(token, message);
+    this.reportParserError(token, message);
     return new ParseError();
+  }
+
+  private reportParserError(token: Token, message: string) {
+    if (token.type == TokenType.EOF) {
+      this.reportParserErrorFormatted(token.line, ' at end', message);
+    } else {
+      this.reportParserErrorFormatted(
+        token.line,
+        ` at '${token.lexeme}'`,
+        message
+      );
+    }
+  }
+
+  private reportParserErrorFormatted(
+    line: number,
+    where: string,
+    message: string
+  ) {
+    console.error(`[line ${line}] Error ${where}: ${message}`);
+    this.hadError = true;
   }
 }

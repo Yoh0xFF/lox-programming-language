@@ -1,9 +1,7 @@
-import { RuntimeError } from 'error';
 import { readFileSync } from 'fs';
 import { Interpreter } from 'interpreter/interpreter';
 import { Parser } from 'parser/parser';
 import readline from 'readline';
-import { Token, TokenType } from 'scanner/token';
 
 import { Scanner } from './scanner/scanner';
 
@@ -68,32 +66,11 @@ function run(source: string) {
 
   const parser = new Parser(tokens);
   const statements = parser.parse();
-  if (hadError) {
+  if (parser.hadError) {
+    hadError = true;
     return;
   }
   // console.log(new AstPrinter().print(expr));
 
-  interpreter.interpret(statements);
-}
-
-export function error(line: number, message: string) {
-  report(line, '', message);
-}
-
-export function reportParserError(token: Token, message: string) {
-  if (token.type == TokenType.EOF) {
-    report(token.line, ' at end', message);
-  } else {
-    report(token.line, ` at '${token.lexeme}'`, message);
-  }
-}
-
-export function reportRuntimeError(error: RuntimeError) {
-  console.log(`${error.message} + "\n[line " + ${error.token.line} + "]"`);
-  hadRuntimeError = true;
-}
-
-export function report(line: number, where: string, message: string) {
-  console.error(`[line ${line}] Error ${where}: ${message}`);
-  hadError = true;
+  hadRuntimeError = interpreter.interpret(statements);
 }

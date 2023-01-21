@@ -1,4 +1,3 @@
-import { error } from 'index';
 import { Token, TokenType, keywords } from 'scanner/token';
 
 export class Scanner {
@@ -8,7 +7,7 @@ export class Scanner {
   private current = 0;
   private line = 1;
 
-  constructor(source: string) {
+  constructor(source: string, public hadError = false) {
     this.source = source;
   }
 
@@ -111,7 +110,7 @@ export class Scanner {
         } else if (this.isAlpha(c)) {
           this.identifier();
         } else {
-          error(this.line, `Unexpected character: ${c}`);
+          this.reportScannerError(this.line, `Unexpected character: ${c}`);
         }
     }
   }
@@ -177,7 +176,7 @@ export class Scanner {
     }
 
     if (this.isAtEnd()) {
-      error(this.line, 'Unterminates string');
+      this.reportScannerError(this.line, 'Unterminates string');
       return;
     }
 
@@ -215,5 +214,18 @@ export class Scanner {
 
     const lexeme = this.source.substring(this.start, this.current);
     this.addToken(keywords.get(lexeme) ?? TokenType.IDENTIFIER);
+  }
+
+  private reportScannerError(line: number, message: string) {
+    this.reportScannerErrorFormatted(line, '', message);
+  }
+
+  private reportScannerErrorFormatted(
+    line: number,
+    where: string,
+    message: string
+  ) {
+    console.error(`[line ${line}] Error ${where}: ${message}`);
+    this.hadError = true;
   }
 }
