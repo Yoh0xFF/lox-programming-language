@@ -1,6 +1,7 @@
 import {
   AssignExpr,
   BinaryExpr,
+  CallExpr,
   GroupingExpr,
   LiteralExpr,
   LogicalExpr,
@@ -33,4 +34,5 @@ export interface ExprVisitor<R> {
   visitLiteralExpr(expression: LiteralExpr): R;
   visitVariableExpr(expression: VariableExpr): R;
   visitLogicalExpr(expression: LogicalExpr): R;
+  visitCallExpr(expression: CallExpr): R;
 }

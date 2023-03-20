@@ -62,3 +62,11 @@ export class LogicalExpr implements Expr {
     return visitor.visitLogicalExpr(this);
   }
 }
+
+export class CallExpr implements Expr {
+  constructor(public callee: Expr, public paren: Token, public args: Expr[]) {}
+
+  accept<R>(visitor: ExprVisitor<R>): R {
+    return visitor.visitCallExpr(this);
+  }
+}
