@@ -1,8 +1,10 @@
 import { RuntimeError } from 'error';
+import { LoxCallable } from 'interpreter/callable';
 import { Environment } from 'interpreter/environment';
 import {
   AssignExpr,
   BinaryExpr,
+  CallExpr,
   Expr,
   GroupingExpr,
   LiteralExpr,
@@ -23,7 +25,20 @@ import { ExprVisitor, StmtVisitor } from 'parser/visitor';
 import { Token, TokenType } from 'scanner/token';
 
 export class Interpreter implements StmtVisitor<void>, ExprVisitor<any> {
-  private environment = new Environment();
+  private globals = new Environment();
+  private environment = this.globals;
+
+  constructor() {
+    const clock: LoxCallable = {
+      arity: () => 0,
+
+      call: (interpreter, args) => {
+        return new Date().getTime() / 1000.0;
+      },
+    };
+
+    this.globals.define('clock', clock);
+  }
 
   interpret(statements: Stmt[]): boolean {
     try {
@@ -131,6 +146,31 @@ export class Interpreter implements StmtVisitor<void>, ExprVisitor<any> {
     }
 
     return null;
+  }
+
+  visitCallExpr(expression: CallExpr) {
+    const callee = this.evaluate(expression.callee);
+
+    const args = [];
+    for (const arg of expression.args) {
+      args.push(this.evaluate(arg));
+    }
+
+    const func = callee as LoxCallable;
+    if (func.call === undefined) {
+      throw new RuntimeError(
+        expression.paren,
+        'Can only call functions and classes.'
+      );
+    }
+    if (func.arity() !== args.length) {
+      throw new RuntimeError(
+        expression.paren,
+        `Expected ${func.arity()} arguments but got ${args.length}.`
+      );
+    }
+
+    return func.call(this, args);
   }
 
   visitUnaryExpr(expression: UnaryExpr): any {
