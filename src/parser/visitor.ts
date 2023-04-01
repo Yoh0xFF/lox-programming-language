@@ -11,6 +11,7 @@ import {
 import {
   BlockStmt,
   ExpressionStmt,
+  FunctionStmt,
   IfStmt,
   PrintStmt,
   VarStmt,
@@ -20,6 +21,7 @@ import {
 export interface StmtVisitor<R> {
   visitBlockStmt(statement: BlockStmt): R;
   visitExpressionStmt(statement: ExpressionStmt): R;
+  visitFunctionStmt(statement: FunctionStmt): R;
   visitVarStmt(statement: VarStmt): R;
   visitPrintStmt(statement: PrintStmt): R;
   visitIfStmt(statement: IfStmt): R;

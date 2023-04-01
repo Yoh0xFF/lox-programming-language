@@ -15,6 +15,7 @@ import {
 import {
   BlockStmt,
   ExpressionStmt,
+  FunctionStmt,
   IfStmt,
   PrintStmt,
   Stmt,
@@ -59,6 +60,10 @@ export class Interpreter implements StmtVisitor<void>, ExprVisitor<any> {
 
   visitExpressionStmt(stmt: ExpressionStmt): void {
     this.evaluate(stmt.expression);
+  }
+
+  visitFunctionStmt(statement: FunctionStmt): void {
+    // TODO
   }
 
   visitVarStmt(stmt: VarStmt): void {

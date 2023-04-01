@@ -13,6 +13,7 @@ import {
 import {
   BlockStmt,
   ExpressionStmt,
+  FunctionStmt,
   IfStmt,
   PrintStmt,
   Stmt,
@@ -44,6 +45,9 @@ export class Parser {
 
   private declaration(): Stmt | undefined {
     try {
+      if (this.match(TokenType.FUN)) {
+        return this.functionDeclaration('function');
+      }
       if (this.match(TokenType.VAR)) {
         return this.varDeclaration();
       }
@@ -57,6 +61,30 @@ export class Parser {
       }
       return undefined;
     }
+  }
+
+  private functionDeclaration(kind: string): Stmt {
+    const name = this.consume(TokenType.IDENTIFIER, `Expect ${kind} name.`);
+    this.consume(TokenType.LEFT_PAREN, `Expect '(' after ${kind} name.`);
+
+    const params: Token[] = [];
+    if (!this.check(TokenType.RIGHT_PAREN)) {
+      do {
+        if (params.length >= 255) {
+          this.error(this.peek(), "Can't have more than 255 parameters.");
+        }
+
+        params.push(
+          this.consume(TokenType.IDENTIFIER, 'Expect parameter name')
+        );
+      } while (this.match(TokenType.COMMA));
+    }
+    this.consume(TokenType.RIGHT_PAREN, `Expect ')' after parameters.`);
+
+    this.consume(TokenType.RIGHT_PAREN, `Expect '{' before ${kind} body.`);
+    const body = this.blockStatement();
+
+    return new FunctionStmt(name, params, body);
   }
 
   private varDeclaration(): Stmt {
