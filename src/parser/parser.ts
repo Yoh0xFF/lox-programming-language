@@ -81,10 +81,10 @@ export class Parser {
     }
     this.consume(TokenType.RIGHT_PAREN, `Expect ')' after parameters.`);
 
-    this.consume(TokenType.RIGHT_PAREN, `Expect '{' before ${kind} body.`);
-    const body = this.blockStmt();
+    this.consume(TokenType.LEFT_BRACE, `Expect '{' before ${kind} body.`);
+    const body = this.blockStmt() as BlockStmt;
 
-    return new FunctionStmt(name, params, body);
+    return new FunctionStmt(name, params, body.stmts);
   }
 
   private varDeclaration(): Stmt {

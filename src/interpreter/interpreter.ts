@@ -1,5 +1,5 @@
 import { RuntimeError } from 'error';
-import { LoxCallable } from 'interpreter/callable';
+import { LoxCallable, LoxFunction } from 'interpreter/callable';
 import { Environment } from 'interpreter/environment';
 import {
   AssignExpr,
@@ -26,7 +26,7 @@ import { ExprVisitor, StmtVisitor } from 'parser/visitor';
 import { Token, TokenType } from 'scanner/token';
 
 export class Interpreter implements StmtVisitor<void>, ExprVisitor<any> {
-  private globals = new Environment();
+  public globals = new Environment();
   private env = this.globals;
 
   constructor() {
@@ -63,7 +63,8 @@ export class Interpreter implements StmtVisitor<void>, ExprVisitor<any> {
   }
 
   visitFunctionStmt(stmt: FunctionStmt): void {
-    // TODO
+    const loxFunction = new LoxFunction(stmt);
+    this.env.define(stmt.name.lexeme, loxFunction);
   }
 
   visitVarStmt(stmt: VarStmt): void {
@@ -224,7 +225,7 @@ export class Interpreter implements StmtVisitor<void>, ExprVisitor<any> {
     stmt.accept(this);
   }
 
-  private executeBlock(stmts: Stmt[], env: Environment): void {
+  executeBlock(stmts: Stmt[], env: Environment): void {
     const previous = this.env;
     try {
       this.env = env;

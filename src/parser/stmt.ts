@@ -23,7 +23,11 @@ export class ExprStmt implements Stmt {
 }
 
 export class FunctionStmt implements Stmt {
-  constructor(public name: Token, public params: Token[], public body: Stmt) {}
+  constructor(
+    public name: Token,
+    public params: Token[],
+    public body: Stmt[]
+  ) {}
 
   accept<R>(visitor: StmtVisitor<R>): R {
     return visitor.visitFunctionStmt(this);
