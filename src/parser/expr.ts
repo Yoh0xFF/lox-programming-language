@@ -30,8 +30,8 @@ export class UnaryExpr implements Expr {
 }
 
 export class GroupingExpr implements Expr {
-  constructor(public expression: Expr) {
-    this.expression = expression;
+  constructor(public expr: Expr) {
+    this.expr = expr;
   }
 
   accept<R>(visitor: ExprVisitor<R>): R {

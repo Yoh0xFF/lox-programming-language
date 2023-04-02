@@ -10,7 +10,7 @@ import {
 } from 'parser/expr';
 import {
   BlockStmt,
-  ExpressionStmt,
+  ExprStmt,
   FunctionStmt,
   IfStmt,
   PrintStmt,
@@ -19,22 +19,22 @@ import {
 } from 'parser/stmt';
 
 export interface StmtVisitor<R> {
-  visitBlockStmt(statement: BlockStmt): R;
-  visitExpressionStmt(statement: ExpressionStmt): R;
-  visitFunctionStmt(statement: FunctionStmt): R;
-  visitVarStmt(statement: VarStmt): R;
-  visitPrintStmt(statement: PrintStmt): R;
-  visitIfStmt(statement: IfStmt): R;
-  visitWhileStmt(statement: WhileStmt): R;
+  visitBlockStmt(stmt: BlockStmt): R;
+  visitExprStmt(stmt: ExprStmt): R;
+  visitFunctionStmt(stmt: FunctionStmt): R;
+  visitVarStmt(stmt: VarStmt): R;
+  visitPrintStmt(stmt: PrintStmt): R;
+  visitIfStmt(stmt: IfStmt): R;
+  visitWhileStmt(stmt: WhileStmt): R;
 }
 
 export interface ExprVisitor<R> {
-  visitAssignExpr(expression: AssignExpr): R;
-  visitBinaryExpr(expression: BinaryExpr): R;
-  visitUnaryExpr(expression: UnaryExpr): R;
-  visitGroupingExpr(expression: GroupingExpr): R;
-  visitLiteralExpr(expression: LiteralExpr): R;
-  visitVariableExpr(expression: VariableExpr): R;
-  visitLogicalExpr(expression: LogicalExpr): R;
-  visitCallExpr(expression: CallExpr): R;
+  visitAssignExpr(expr: AssignExpr): R;
+  visitBinaryExpr(expr: BinaryExpr): R;
+  visitUnaryExpr(expr: UnaryExpr): R;
+  visitGroupingExpr(expr: GroupingExpr): R;
+  visitLiteralExpr(expr: LiteralExpr): R;
+  visitVariableExpr(expr: VariableExpr): R;
+  visitLogicalExpr(expr: LogicalExpr): R;
+  visitCallExpr(expr: CallExpr): R;
 }

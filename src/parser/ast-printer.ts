@@ -1,13 +1,3 @@
-import {
-  BinaryExpr,
-  Expr,
-  GroupingExpr,
-  LiteralExpr,
-  UnaryExpr,
-  VariableExpr,
-} from 'parser/expr';
-import { ExprVisitor } from 'parser/visitor';
-
 export class AstPrinter /*implements ExprVisitor<string>*/ {
   /*
   print(expression: Expr): string {

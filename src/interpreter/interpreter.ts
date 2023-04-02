@@ -14,7 +14,7 @@ import {
 } from 'parser/expr';
 import {
   BlockStmt,
-  ExpressionStmt,
+  ExprStmt,
   FunctionStmt,
   IfStmt,
   PrintStmt,
@@ -27,7 +27,7 @@ import { Token, TokenType } from 'scanner/token';
 
 export class Interpreter implements StmtVisitor<void>, ExprVisitor<any> {
   private globals = new Environment();
-  private environment = this.globals;
+  private env = this.globals;
 
   constructor() {
     const clock: LoxCallable = {
@@ -41,10 +41,10 @@ export class Interpreter implements StmtVisitor<void>, ExprVisitor<any> {
     this.globals.define('clock', clock);
   }
 
-  interpret(statements: Stmt[]): boolean {
+  interpret(stmts: Stmt[]): boolean {
     try {
-      for (const statement of statements) {
-        this.execute(statement);
+      for (const stmt of stmts) {
+        this.execute(stmt);
       }
 
       return true;
@@ -58,11 +58,11 @@ export class Interpreter implements StmtVisitor<void>, ExprVisitor<any> {
     }
   }
 
-  visitExpressionStmt(stmt: ExpressionStmt): void {
-    this.evaluate(stmt.expression);
+  visitExprStmt(stmt: ExprStmt): void {
+    this.evaluate(stmt.expr);
   }
 
-  visitFunctionStmt(statement: FunctionStmt): void {
+  visitFunctionStmt(stmt: FunctionStmt): void {
     // TODO
   }
 
@@ -73,63 +73,63 @@ export class Interpreter implements StmtVisitor<void>, ExprVisitor<any> {
       value = this.evaluate(stmt.initializer);
     }
 
-    this.environment.define(stmt.name.lexeme, value);
+    this.env.define(stmt.name.lexeme, value);
   }
 
   visitPrintStmt(stmt: PrintStmt): void {
-    const value = this.evaluate(stmt.expression);
+    const value = this.evaluate(stmt.expr);
     console.log(JSON.stringify(value));
   }
 
-  visitBlockStmt(statement: BlockStmt): void {
-    this.executeBlock(statement.statements, new Environment(this.environment));
+  visitBlockStmt(stmt: BlockStmt): void {
+    this.executeBlock(stmt.stmts, new Environment(this.env));
   }
 
-  visitIfStmt(statement: IfStmt): void {
-    if (this.isTruthy(this.evaluate(statement.condition))) {
-      this.execute(statement.thenBranch);
-    } else if (statement.elseBranch != null) {
-      this.execute(statement.elseBranch);
+  visitIfStmt(stmt: IfStmt): void {
+    if (this.isTruthy(this.evaluate(stmt.condition))) {
+      this.execute(stmt.thenBranch);
+    } else if (stmt.elseBranch != null) {
+      this.execute(stmt.elseBranch);
     }
   }
 
-  visitWhileStmt(statement: WhileStmt): void {
-    const { condition, body } = statement;
+  visitWhileStmt(stmt: WhileStmt): void {
+    const { condition, body } = stmt;
 
     while (this.isTruthy(this.evaluate(condition))) {
       this.execute(body);
     }
   }
 
-  visitAssignExpr(expression: AssignExpr): any {
-    const value = this.evaluate(expression.value);
-    this.environment.assign(expression.name, value);
+  visitAssignExpr(expr: AssignExpr): any {
+    const value = this.evaluate(expr.value);
+    this.env.assign(expr.name, value);
     return value;
   }
 
-  visitBinaryExpr(expression: BinaryExpr): any {
-    const left = this.evaluate(expression.left);
-    const right = this.evaluate(expression.right);
+  visitBinaryExpr(expr: BinaryExpr): any {
+    const left = this.evaluate(expr.left);
+    const right = this.evaluate(expr.right);
 
-    switch (expression.operator.type) {
+    switch (expr.operator.type) {
       case TokenType.BANG_EQUAL:
         return !this.isEqual(left, right);
       case TokenType.EQUAL_EQUAL:
         return this.isEqual(left, right);
       case TokenType.GREATER:
-        this.checkNumberOperands(expression.operator, left, right);
+        this.checkNumberOperands(expr.operator, left, right);
         return Number(left) > Number(right);
       case TokenType.GREATER_EQUAL:
-        this.checkNumberOperands(expression.operator, left, right);
+        this.checkNumberOperands(expr.operator, left, right);
         return Number(left) >= Number(right);
       case TokenType.LESS:
-        this.checkNumberOperands(expression.operator, left, right);
+        this.checkNumberOperands(expr.operator, left, right);
         return Number(left) < Number(right);
       case TokenType.LESS_EQUAL:
-        this.checkNumberOperands(expression.operator, left, right);
+        this.checkNumberOperands(expr.operator, left, right);
         return Number(left) <= Number(right);
       case TokenType.MINUS:
-        this.checkNumberOperands(expression.operator, left, right);
+        this.checkNumberOperands(expr.operator, left, right);
         return Number(left) - Number(right);
       case TokenType.PLUS:
         if (this.isNumber(left) && this.isNumber(right)) {
@@ -139,38 +139,38 @@ export class Interpreter implements StmtVisitor<void>, ExprVisitor<any> {
           return String(left) + String(right);
         }
         throw new RuntimeError(
-          expression.operator,
+          expr.operator,
           'Operands must be two numbers or two strings.'
         );
       case TokenType.SLASH:
-        this.checkNumberOperands(expression.operator, left, right);
+        this.checkNumberOperands(expr.operator, left, right);
         return Number(left) / Number(right);
       case TokenType.STAR:
-        this.checkNumberOperands(expression.operator, left, right);
+        this.checkNumberOperands(expr.operator, left, right);
         return Number(left) * Number(right);
     }
 
     return null;
   }
 
-  visitCallExpr(expression: CallExpr) {
-    const callee = this.evaluate(expression.callee);
+  visitCallExpr(expr: CallExpr) {
+    const callee = this.evaluate(expr.callee);
 
     const args = [];
-    for (const arg of expression.args) {
+    for (const arg of expr.args) {
       args.push(this.evaluate(arg));
     }
 
     const func = callee as LoxCallable;
     if (func.call === undefined) {
       throw new RuntimeError(
-        expression.paren,
+        expr.paren,
         'Can only call functions and classes.'
       );
     }
     if (func.arity() !== args.length) {
       throw new RuntimeError(
-        expression.paren,
+        expr.paren,
         `Expected ${func.arity()} arguments but got ${args.length}.`
       );
     }
@@ -178,36 +178,36 @@ export class Interpreter implements StmtVisitor<void>, ExprVisitor<any> {
     return func.call(this, args);
   }
 
-  visitUnaryExpr(expression: UnaryExpr): any {
-    const right = this.evaluate(expression.right);
+  visitUnaryExpr(expr: UnaryExpr): any {
+    const right = this.evaluate(expr.right);
 
-    switch (expression.operator.type) {
+    switch (expr.operator.type) {
       case TokenType.BANG:
         return !this.isTruthy(right);
       case TokenType.MINUS:
-        this.checkNumberOperands(expression.operator, right);
+        this.checkNumberOperands(expr.operator, right);
         return -1 * Number(right);
     }
 
     return null;
   }
 
-  visitGroupingExpr(expression: GroupingExpr): any {
-    return this.evaluate(expression.expression);
+  visitGroupingExpr(expr: GroupingExpr): any {
+    return this.evaluate(expr.expr);
   }
 
-  visitLiteralExpr(expression: LiteralExpr): any {
-    return expression.value;
+  visitLiteralExpr(expr: LiteralExpr): any {
+    return expr.value;
   }
 
-  visitVariableExpr(expression: VariableExpr): any {
-    return this.environment.get(expression.name);
+  visitVariableExpr(expr: VariableExpr): any {
+    return this.env.get(expr.name);
   }
 
-  visitLogicalExpr(expression: LogicalExpr): any {
-    const left = this.evaluate(expression.left);
+  visitLogicalExpr(expr: LogicalExpr): any {
+    const left = this.evaluate(expr.left);
 
-    if (expression.operator.type === TokenType.OR) {
+    if (expr.operator.type === TokenType.OR) {
       if (this.isTruthy(left)) {
         return left;
       }
@@ -217,28 +217,28 @@ export class Interpreter implements StmtVisitor<void>, ExprVisitor<any> {
       }
     }
 
-    return this.evaluate(expression.right);
+    return this.evaluate(expr.right);
   }
 
-  private execute(statement: Stmt): void {
-    statement.accept(this);
+  private execute(stmt: Stmt): void {
+    stmt.accept(this);
   }
 
-  private executeBlock(statements: Stmt[], environment: Environment): void {
-    const previous = this.environment;
+  private executeBlock(stmts: Stmt[], env: Environment): void {
+    const previous = this.env;
     try {
-      this.environment = environment;
+      this.env = env;
 
-      for (const statement of statements) {
-        this.execute(statement);
+      for (const stmt of stmts) {
+        this.execute(stmt);
       }
     } finally {
-      this.environment = previous;
+      this.env = previous;
     }
   }
 
-  private evaluate(statement: Expr): any {
-    return statement.accept(this);
+  private evaluate(stmt: Expr): any {
+    return stmt.accept(this);
   }
 
   private isTruthy(right: any): boolean {

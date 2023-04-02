@@ -7,18 +7,18 @@ export interface Stmt {
 }
 
 export class BlockStmt implements Stmt {
-  constructor(public statements: Stmt[]) {}
+  constructor(public stmts: Stmt[]) {}
 
   accept<R>(visitor: StmtVisitor<R>): R {
     return visitor.visitBlockStmt(this);
   }
 }
 
-export class ExpressionStmt implements Stmt {
-  constructor(public expression: Expr) {}
+export class ExprStmt implements Stmt {
+  constructor(public expr: Expr) {}
 
   accept<R>(visitor: StmtVisitor<R>): R {
-    return visitor.visitExpressionStmt(this);
+    return visitor.visitExprStmt(this);
   }
 }
 
@@ -51,7 +51,7 @@ export class IfStmt implements Stmt {
 }
 
 export class PrintStmt implements Stmt {
-  constructor(public expression: Expr) {}
+  constructor(public expr: Expr) {}
 
   accept<R>(visitor: StmtVisitor<R>): R {
     return visitor.visitPrintStmt(this);
