@@ -14,6 +14,7 @@ import {
   FunctionStmt,
   IfStmt,
   PrintStmt,
+  ReturnStmt,
   VarStmt,
   WhileStmt,
 } from 'parser/stmt';
@@ -24,6 +25,7 @@ export interface StmtVisitor<R> {
   visitFunctionStmt(stmt: FunctionStmt): R;
   visitVarStmt(stmt: VarStmt): R;
   visitPrintStmt(stmt: PrintStmt): R;
+  visitReturnStmt(stmt: ReturnStmt): R;
   visitIfStmt(stmt: IfStmt): R;
   visitWhileStmt(stmt: WhileStmt): R;
 }

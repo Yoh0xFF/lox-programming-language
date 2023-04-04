@@ -62,6 +62,14 @@ export class PrintStmt implements Stmt {
   }
 }
 
+export class ReturnStmt implements Stmt {
+  constructor(public keyword: Token, public value?: Expr) {}
+
+  accept<R>(visitor: StmtVisitor<R>): R {
+    return visitor.visitReturnStmt(this);
+  }
+}
+
 export class WhileStmt implements Stmt {
   constructor(public condition: Expr, public body: Stmt) {}
 

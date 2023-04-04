@@ -1,5 +1,5 @@
 import { RuntimeError } from 'error';
-import { LoxCallable, LoxFunction } from 'interpreter/callable';
+import { LoxCallable, LoxFunction, Return } from 'interpreter/callable';
 import { Environment } from 'interpreter/environment';
 import {
   AssignExpr,
@@ -18,6 +18,7 @@ import {
   FunctionStmt,
   IfStmt,
   PrintStmt,
+  ReturnStmt,
   Stmt,
   VarStmt,
   WhileStmt,
@@ -80,6 +81,16 @@ export class Interpreter implements StmtVisitor<void>, ExprVisitor<any> {
   visitPrintStmt(stmt: PrintStmt): void {
     const value = this.evaluate(stmt.expr);
     console.log(JSON.stringify(value));
+  }
+
+  visitReturnStmt(stmt: ReturnStmt): void {
+    let value = undefined;
+
+    if (stmt.value) {
+      value = this.evaluate(stmt.value);
+    }
+
+    throw new Return(value);
   }
 
   visitBlockStmt(stmt: BlockStmt): void {

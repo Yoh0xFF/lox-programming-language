@@ -16,6 +16,7 @@ import {
   FunctionStmt,
   IfStmt,
   PrintStmt,
+  ReturnStmt,
   Stmt,
   VarStmt,
   WhileStmt,
@@ -103,6 +104,9 @@ export class Parser {
     if (this.match(TokenType.PRINT)) {
       return this.printStmt();
     }
+    if (this.match(TokenType.RETURN)) {
+      return this.returnStmt();
+    }
     if (this.match(TokenType.LEFT_BRACE)) {
       return this.blockStmt();
     }
@@ -125,6 +129,17 @@ export class Parser {
     this.consume(TokenType.SEMICOLON, 'Expect ";" after value.');
 
     return new PrintStmt(value);
+  }
+
+  private returnStmt(): Stmt {
+    const keyword = this.previous();
+
+    let value: Expr | undefined = undefined;
+    if (!this.check(TokenType.SEMICOLON)) {
+      value = this.expr();
+    }
+    this.consume(TokenType.SEMICOLON, "Expect ';' after return value.");
+    return new ReturnStmt(keyword, value);
   }
 
   private blockStmt(): Stmt {

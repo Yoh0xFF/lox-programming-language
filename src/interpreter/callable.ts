@@ -17,7 +17,15 @@ export class LoxFunction implements LoxCallable {
       env.define(this.declaration.params[i].lexeme, args[i]);
     }
 
-    interpreter.executeBlock(this.declaration.body, env);
+    try {
+      interpreter.executeBlock(this.declaration.body, env);
+    } catch (rslt) {
+      if (rslt instanceof Return) {
+        return rslt.value;
+      }
+      console.error(rslt);
+      throw rslt;
+    }
   }
 
   arity(): number {
@@ -27,4 +35,8 @@ export class LoxFunction implements LoxCallable {
   toString() {
     return `<fn ${this.declaration.name.lexeme}>`;
   }
+}
+
+export class Return {
+  constructor(public value?: any) {}
 }
