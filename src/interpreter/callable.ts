@@ -8,10 +8,13 @@ export interface LoxCallable {
 }
 
 export class LoxFunction implements LoxCallable {
-  constructor(private declaration: FunctionStmt) {}
+  constructor(
+    private declaration: FunctionStmt,
+    private closure: Environment
+  ) {}
 
   call(interpreter: Interpreter, args: any[]) {
-    const env = new Environment(interpreter.globals);
+    const env = new Environment(this.closure);
 
     for (let i = 0; i < this.declaration.params.length; i++) {
       env.define(this.declaration.params[i].lexeme, args[i]);
