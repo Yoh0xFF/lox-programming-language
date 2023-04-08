@@ -76,6 +76,10 @@ function run(source: string) {
 
   const resolver = new Resolver(interpreter);
   resolver.resolveStmts(statements);
+  if (resolver.hadError) {
+    hadError = true;
+    return;
+  }
 
   hadRuntimeError = interpreter.interpret(statements);
 }

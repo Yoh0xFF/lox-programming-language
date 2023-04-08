@@ -24,8 +24,15 @@ import {
 import { ExprVisitor, StmtVisitor } from 'parser/visitor';
 import { Token, TokenType } from 'scanner/token';
 
+enum FunctionType {
+  None = 'NONE',
+  Function = 'FUNCTION',
+}
+
 export class Resolver implements ExprVisitor<void>, StmtVisitor<void> {
   private scopes: Map<string, boolean>[] = [];
+  private currentFunctionType = FunctionType.None;
+  public hadError = false;
 
   constructor(private interpreter: Interpreter) {}
 
@@ -77,10 +84,12 @@ export class Resolver implements ExprVisitor<void>, StmtVisitor<void> {
     this.declare(stmt.name);
     this.define(stmt.name);
 
-    this.resolveFunction(stmt);
+    this.resolveFunction(stmt, FunctionType.Function);
   }
 
-  private resolveFunction(stmt: FunctionStmt) {
+  private resolveFunction(stmt: FunctionStmt, type: FunctionType) {
+    const enclosingFunctionType = this.currentFunctionType;
+    this.currentFunctionType = type;
     this.beginScope();
 
     for (const param of stmt.params) {
@@ -90,6 +99,7 @@ export class Resolver implements ExprVisitor<void>, StmtVisitor<void> {
     this.resolveStmts(stmt.body);
 
     this.endScope();
+    this.currentFunctionType = enclosingFunctionType;
   }
 
   visitExprStmt(stmt: ExprStmt) {
@@ -109,6 +119,13 @@ export class Resolver implements ExprVisitor<void>, StmtVisitor<void> {
   }
 
   visitReturnStmt(stmt: ReturnStmt) {
+    if (this.currentFunctionType === FunctionType.None) {
+      this.reportResolverError(
+        stmt.keyword,
+        "Can't return from top-level code."
+      );
+    }
+
     if (stmt.value) {
       this.resolveExpr(stmt.value);
     }
@@ -174,6 +191,14 @@ export class Resolver implements ExprVisitor<void>, StmtVisitor<void> {
       return;
     }
     const scope = this.scopes[this.scopes.length - 1];
+
+    if (scope.has(name.lexeme)) {
+      this.reportResolverError(
+        name,
+        'Already a variable with this name in this scope.'
+      );
+    }
+
     scope.set(name.lexeme, false);
   }
 
@@ -199,5 +224,6 @@ export class Resolver implements ExprVisitor<void>, StmtVisitor<void> {
     message: string
   ) {
     console.error(`[line ${line}] Error ${where}: ${message}`);
+    this.hadError = true;
   }
 }
