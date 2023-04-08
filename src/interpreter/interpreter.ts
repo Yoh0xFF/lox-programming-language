@@ -28,6 +28,7 @@ import { Token, TokenType } from 'scanner/token';
 
 export class Interpreter implements StmtVisitor<void>, ExprVisitor<any> {
   public globals = new Environment();
+  private locals: Map<Expr, number> = new Map();
   private env = this.globals;
 
   constructor() {
@@ -40,6 +41,10 @@ export class Interpreter implements StmtVisitor<void>, ExprVisitor<any> {
     };
 
     this.globals.define('clock', clock);
+  }
+
+  resolve(expr: Expr, depth: number) {
+    this.locals.set(expr, depth);
   }
 
   interpret(stmts: Stmt[]): boolean {
@@ -115,7 +120,15 @@ export class Interpreter implements StmtVisitor<void>, ExprVisitor<any> {
 
   visitAssignExpr(expr: AssignExpr): any {
     const value = this.evaluate(expr.value);
+
+    const distance = this.locals.get(expr);
+    if (distance != null) {
+      this.env.assignAt(distance, expr.name, value);
+    } else {
+      this.globals.assign(expr.name, value);
+    }
     this.env.assign(expr.name, value);
+
     return value;
   }
 
@@ -213,7 +226,16 @@ export class Interpreter implements StmtVisitor<void>, ExprVisitor<any> {
   }
 
   visitVariableExpr(expr: VariableExpr): any {
-    return this.env.get(expr.name);
+    return this.lookupVarable(expr.name, expr);
+  }
+
+  private lookupVarable(name: Token, expr: Expr) {
+    const distance = this.locals.get(expr);
+    if (distance != null) {
+      return this.env.getAt(distance, name);
+    } else {
+      return this.globals.get(name);
+    }
   }
 
   visitLogicalExpr(expr: LogicalExpr): any {

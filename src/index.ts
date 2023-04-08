@@ -1,5 +1,6 @@
 import { readFileSync } from 'fs';
 import { Interpreter } from 'interpreter/interpreter';
+import { Resolver } from 'interpreter/resolver';
 import { Parser } from 'parser/parser';
 import readline from 'readline';
 
@@ -70,7 +71,11 @@ function run(source: string) {
     hadError = true;
     return;
   }
+
   // console.log(new AstPrinter().print(expr));
+
+  const resolver = new Resolver(interpreter);
+  resolver.resolveStmts(statements);
 
   hadRuntimeError = interpreter.interpret(statements);
 }

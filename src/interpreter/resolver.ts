@@ -1,6 +1,26 @@
 import { Interpreter } from 'interpreter/interpreter';
-import { AssignExpr, Expr, VariableExpr } from 'parser/expr';
-import { BlockStmt, Stmt, VarStmt } from 'parser/stmt';
+import {
+  AssignExpr,
+  BinaryExpr,
+  CallExpr,
+  Expr,
+  GroupingExpr,
+  LiteralExpr,
+  LogicalExpr,
+  UnaryExpr,
+  VariableExpr,
+} from 'parser/expr';
+import {
+  BlockStmt,
+  ExprStmt,
+  FunctionStmt,
+  IfStmt,
+  PrintStmt,
+  ReturnStmt,
+  Stmt,
+  VarStmt,
+  WhileStmt,
+} from 'parser/stmt';
 import { ExprVisitor, StmtVisitor } from 'parser/visitor';
 import { Token, TokenType } from 'scanner/token';
 
@@ -29,7 +49,7 @@ export class Resolver implements ExprVisitor<void>, StmtVisitor<void> {
         ? undefined
         : this.scopes[this.scopes.length - 1];
 
-    if (!scope || scope.get(expr.name.lexeme) === false) {
+    if (scope && scope.get(expr.name.lexeme) === false) {
       this.reportResolverError(
         expr.name,
         "Can't read local variable in its own initializer."
@@ -39,7 +59,7 @@ export class Resolver implements ExprVisitor<void>, StmtVisitor<void> {
     this.resolveLocal(expr, expr.name);
   }
 
-  visitAssignExpr(expr: AssignExpr): void {
+  visitAssignExpr(expr: AssignExpr) {
     this.resolveExpr(expr.value);
     this.resolveLocal(expr, expr.name);
   }
@@ -47,10 +67,84 @@ export class Resolver implements ExprVisitor<void>, StmtVisitor<void> {
   private resolveLocal(expr: Expr, name: Token) {
     for (let i = this.scopes.length - 1; i >= 0; i--) {
       if (this.scopes[i].has(name.lexeme)) {
-        // TODO this.interpreter.resolve(expr, this.scopes.length - 1 - i);
+        this.interpreter.resolve(expr, this.scopes.length - 1 - i);
         return;
       }
     }
+  }
+
+  visitFunctionStmt(stmt: FunctionStmt) {
+    this.declare(stmt.name);
+    this.define(stmt.name);
+
+    this.resolveFunction(stmt);
+  }
+
+  private resolveFunction(stmt: FunctionStmt) {
+    this.beginScope();
+
+    for (const param of stmt.params) {
+      this.declare(param);
+      this.define(param);
+    }
+    this.resolveStmts(stmt.body);
+
+    this.endScope();
+  }
+
+  visitExprStmt(stmt: ExprStmt) {
+    this.resolveExpr(stmt.expr);
+  }
+
+  visitIfStmt(stmt: IfStmt) {
+    this.resolveExpr(stmt.condition);
+    this.resolveStmt(stmt.thenBranch);
+    if (stmt.elseBranch) {
+      this.resolveStmt(stmt.elseBranch);
+    }
+  }
+
+  visitPrintStmt(stmt: PrintStmt) {
+    this.resolveExpr(stmt.expr);
+  }
+
+  visitReturnStmt(stmt: ReturnStmt) {
+    if (stmt.value) {
+      this.resolveExpr(stmt.value);
+    }
+  }
+
+  visitWhileStmt(stmt: WhileStmt) {
+    this.resolveExpr(stmt.condition);
+    this.resolveStmt(stmt.body);
+  }
+
+  visitBinaryExpr(expr: BinaryExpr) {
+    this.resolveExpr(expr.left);
+    this.resolveExpr(expr.right);
+  }
+
+  visitCallExpr(expr: CallExpr) {
+    this.resolveExpr(expr.callee);
+
+    for (const arg of expr.args) {
+      this.resolveExpr(arg);
+    }
+  }
+
+  visitGroupingExpr(expr: GroupingExpr) {
+    this.resolveExpr(expr.expr);
+  }
+
+  visitLiteralExpr(expr: LiteralExpr) {}
+
+  visitLogicalExpr(expr: LogicalExpr) {
+    this.resolveExpr(expr.left);
+    this.resolveExpr(expr.right);
+  }
+
+  visitUnaryExpr(expr: UnaryExpr) {
+    this.resolveExpr(expr.right);
   }
 
   private beginScope() {
@@ -61,7 +155,7 @@ export class Resolver implements ExprVisitor<void>, StmtVisitor<void> {
     this.scopes.pop();
   }
 
-  private resolveStmts(stmts: Stmt[]) {
+  resolveStmts(stmts: Stmt[]) {
     for (const stmt of stmts) {
       this.resolveStmt(stmt);
     }
