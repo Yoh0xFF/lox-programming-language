@@ -22,6 +22,14 @@ export class ExprStmt implements Stmt {
   }
 }
 
+export class ClassStmt implements Stmt {
+  constructor(public name: Token, public methods: FunctionStmt[]) {}
+
+  accept<R>(visitor: StmtVisitor<R>): R {
+    return visitor.visitClassStmt(this);
+  }
+}
+
 export class FunctionStmt implements Stmt {
   constructor(
     public name: Token,

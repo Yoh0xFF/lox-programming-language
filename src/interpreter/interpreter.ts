@@ -1,5 +1,6 @@
 import { RuntimeError } from 'error';
 import { LoxCallable, LoxFunction, Return } from 'interpreter/callable';
+import { LoxClass } from 'interpreter/class';
 import { Environment } from 'interpreter/environment';
 import {
   AssignExpr,
@@ -14,6 +15,7 @@ import {
 } from 'parser/expr';
 import {
   BlockStmt,
+  ClassStmt,
   ExprStmt,
   FunctionStmt,
   IfStmt,
@@ -68,6 +70,12 @@ export class Interpreter implements StmtVisitor<void>, ExprVisitor<any> {
     this.evaluate(stmt.expr);
   }
 
+  visitClassStmt(stmt: ClassStmt): void {
+    this.env.define(stmt.name.lexeme, undefined);
+    const clazz = new LoxClass(stmt.name.lexeme);
+    this.env.assign(stmt.name, clazz);
+  }
+
   visitFunctionStmt(stmt: FunctionStmt): void {
     const loxFunction = new LoxFunction(stmt, this.env);
     this.env.define(stmt.name.lexeme, loxFunction);
@@ -85,7 +93,8 @@ export class Interpreter implements StmtVisitor<void>, ExprVisitor<any> {
 
   visitPrintStmt(stmt: PrintStmt): void {
     const value = this.evaluate(stmt.expr);
-    console.log(JSON.stringify(value));
+    // console.log(JSON.stringify(value));
+    console.log(`${value}`);
   }
 
   visitReturnStmt(stmt: ReturnStmt): void {

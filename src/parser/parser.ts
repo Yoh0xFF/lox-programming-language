@@ -12,6 +12,7 @@ import {
 } from 'parser/expr';
 import {
   BlockStmt,
+  ClassStmt,
   ExprStmt,
   FunctionStmt,
   IfStmt,
@@ -46,6 +47,9 @@ export class Parser {
 
   private declaration(): Stmt | undefined {
     try {
+      if (this.match(TokenType.CLASS)) {
+        return this.classDeclaration();
+      }
       if (this.match(TokenType.FUN)) {
         return this.functionDeclaration('function');
       }
@@ -64,7 +68,21 @@ export class Parser {
     }
   }
 
-  private functionDeclaration(kind: string): Stmt {
+  private classDeclaration(): ClassStmt {
+    const name = this.consume(TokenType.IDENTIFIER, 'Expect class name.');
+    this.consume(TokenType.LEFT_BRACE, 'Expect "{" before class body.');
+
+    const methods: FunctionStmt[] = [];
+    while (!this.check(TokenType.RIGHT_BRACE) && !this.isAtEnd()) {
+      methods.push(this.functionDeclaration('method'));
+    }
+
+    this.consume(TokenType.RIGHT_BRACE, 'Expect "}" after class body.');
+
+    return new ClassStmt(name, methods);
+  }
+
+  private functionDeclaration(kind: string): FunctionStmt {
     const name = this.consume(TokenType.IDENTIFIER, `Expect ${kind} name.`);
     this.consume(TokenType.LEFT_PAREN, `Expect '(' after ${kind} name.`);
 
@@ -88,7 +106,7 @@ export class Parser {
     return new FunctionStmt(name, params, body.stmts);
   }
 
-  private varDeclaration(): Stmt {
+  private varDeclaration(): VarStmt {
     const name = this.consume(TokenType.IDENTIFIER, 'Expect variable name.');
 
     let initializer: Expr | undefined = undefined;
@@ -123,7 +141,7 @@ export class Parser {
     return this.exprStmt();
   }
 
-  private printStmt(): Stmt {
+  private printStmt(): PrintStmt {
     const value = this.expr();
 
     this.consume(TokenType.SEMICOLON, 'Expect ";" after value.');
@@ -131,7 +149,7 @@ export class Parser {
     return new PrintStmt(value);
   }
 
-  private returnStmt(): Stmt {
+  private returnStmt(): ReturnStmt {
     const keyword = this.previous();
 
     let value: Expr | undefined = undefined;
@@ -142,7 +160,7 @@ export class Parser {
     return new ReturnStmt(keyword, value);
   }
 
-  private blockStmt(): Stmt {
+  private blockStmt(): BlockStmt {
     var stmts: Stmt[] = [];
 
     while (!this.check(TokenType.RIGHT_BRACE) && !this.isAtEnd()) {
@@ -157,7 +175,7 @@ export class Parser {
     return new BlockStmt(stmts);
   }
 
-  private ifStmt(): Stmt {
+  private ifStmt(): IfStmt {
     this.consume(TokenType.LEFT_PAREN, 'Expect "(" after "if".');
     const condition = this.expr();
     this.consume(TokenType.RIGHT_PAREN, 'Expect ")" after if condition');
@@ -171,7 +189,7 @@ export class Parser {
     return new IfStmt(condition, thenBranch, elseBranch);
   }
 
-  private whileStmt(): Stmt {
+  private whileStmt(): WhileStmt {
     this.consume(TokenType.LEFT_PAREN, 'Expect "(" after "while".');
     const condition = this.expr();
     this.consume(TokenType.RIGHT_PAREN, 'Expect ")" after condition.');
@@ -222,7 +240,7 @@ export class Parser {
     return body;
   }
 
-  private exprStmt(): Stmt {
+  private exprStmt(): ExprStmt {
     const expr = this.expr();
 
     this.consume(TokenType.SEMICOLON, 'Expect ";" after expression.');

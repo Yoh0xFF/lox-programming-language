@@ -10,6 +10,7 @@ import {
 } from 'parser/expr';
 import {
   BlockStmt,
+  ClassStmt,
   ExprStmt,
   FunctionStmt,
   IfStmt,
@@ -22,6 +23,7 @@ import {
 export interface StmtVisitor<R> {
   visitBlockStmt(stmt: BlockStmt): R;
   visitExprStmt(stmt: ExprStmt): R;
+  visitClassStmt(stmt: ClassStmt): R;
   visitFunctionStmt(stmt: FunctionStmt): R;
   visitVarStmt(stmt: VarStmt): R;
   visitPrintStmt(stmt: PrintStmt): R;

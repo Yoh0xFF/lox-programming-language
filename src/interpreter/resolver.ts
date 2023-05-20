@@ -12,6 +12,7 @@ import {
 } from 'parser/expr';
 import {
   BlockStmt,
+  ClassStmt,
   ExprStmt,
   FunctionStmt,
   IfStmt,
@@ -78,6 +79,11 @@ export class Resolver implements ExprVisitor<void>, StmtVisitor<void> {
         return;
       }
     }
+  }
+
+  visitClassStmt(stmt: ClassStmt): void {
+    this.declare(stmt.name);
+    this.define(stmt.name);
   }
 
   visitFunctionStmt(stmt: FunctionStmt) {
