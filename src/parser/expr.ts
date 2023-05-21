@@ -70,3 +70,11 @@ export class CallExpr implements Expr {
     return visitor.visitCallExpr(this);
   }
 }
+
+export class GetExpr implements Expr {
+  constructor(public object: Expr, public name: Token) {}
+
+  accept<R>(visitor: ExprVisitor<R>): R {
+    return visitor.visitGetExpr(this);
+  }
+}

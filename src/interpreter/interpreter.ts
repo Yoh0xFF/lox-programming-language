@@ -1,12 +1,13 @@
 import { RuntimeError } from 'error';
 import { LoxCallable, LoxFunction, Return } from 'interpreter/callable';
-import { LoxClass } from 'interpreter/class';
+import { LoxClass, LoxInstance } from 'interpreter/class';
 import { Environment } from 'interpreter/environment';
 import {
   AssignExpr,
   BinaryExpr,
   CallExpr,
   Expr,
+  GetExpr,
   GroupingExpr,
   LiteralExpr,
   LogicalExpr,
@@ -210,6 +211,16 @@ export class Interpreter implements StmtVisitor<void>, ExprVisitor<any> {
     }
 
     return func.call(this, args);
+  }
+
+  visitGetExpr(expr: GetExpr) {
+    const object = this.evaluate(expr.object);
+
+    if (object instanceof LoxInstance) {
+      return object.get(expr.name);
+    }
+
+    throw new RuntimeError(expr.name, 'Only instances have properties.');
   }
 
   visitUnaryExpr(expr: UnaryExpr): any {
