@@ -6,6 +6,7 @@ import {
   GroupingExpr,
   LiteralExpr,
   LogicalExpr,
+  SetExpr,
   UnaryExpr,
   VariableExpr,
 } from 'parser/expr';
@@ -43,4 +44,5 @@ export interface ExprVisitor<R> {
   visitLogicalExpr(expr: LogicalExpr): R;
   visitCallExpr(expr: CallExpr): R;
   visitGetExpr(expr: GetExpr): R;
+  visitSetExpr(expr: SetExpr): R;
 }

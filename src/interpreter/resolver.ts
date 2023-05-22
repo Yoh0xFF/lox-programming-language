@@ -8,6 +8,7 @@ import {
   GroupingExpr,
   LiteralExpr,
   LogicalExpr,
+  SetExpr,
   UnaryExpr,
   VariableExpr,
 } from 'parser/expr';
@@ -157,6 +158,11 @@ export class Resolver implements ExprVisitor<void>, StmtVisitor<void> {
   }
 
   visitGetExpr(expr: GetExpr): void {
+    this.resolveExpr(expr.object);
+  }
+
+  visitSetExpr(expr: SetExpr): void {
+    this.resolveExpr(expr.value);
     this.resolveExpr(expr.object);
   }
 

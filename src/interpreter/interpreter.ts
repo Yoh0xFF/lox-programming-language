@@ -11,6 +11,7 @@ import {
   GroupingExpr,
   LiteralExpr,
   LogicalExpr,
+  SetExpr,
   UnaryExpr,
   VariableExpr,
 } from 'parser/expr';
@@ -221,6 +222,18 @@ export class Interpreter implements StmtVisitor<void>, ExprVisitor<any> {
     }
 
     throw new RuntimeError(expr.name, 'Only instances have properties.');
+  }
+
+  visitSetExpr(expr: SetExpr) {
+    const object = this.evaluate(expr.object);
+
+    if (object instanceof LoxInstance) {
+      const value = this.evaluate(expr.value);
+      object.set(expr.name, value);
+      return;
+    }
+
+    throw new RuntimeError(expr.name, 'Only instances have fields');
   }
 
   visitUnaryExpr(expr: UnaryExpr): any {

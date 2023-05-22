@@ -8,6 +8,7 @@ import {
   GroupingExpr,
   LiteralExpr,
   LogicalExpr,
+  SetExpr,
   UnaryExpr,
   VariableExpr,
 } from 'parser/expr';
@@ -263,6 +264,8 @@ export class Parser {
       if (expr instanceof VariableExpr) {
         const name = (expr as VariableExpr).name;
         return new AssignExpr(name, value);
+      } else if (expr instanceof GetExpr) {
+        return new SetExpr(expr.object, expr.name, value);
       }
 
       this.error(equals, 'Invalid assignment target.');

@@ -78,3 +78,11 @@ export class GetExpr implements Expr {
     return visitor.visitGetExpr(this);
   }
 }
+
+export class SetExpr implements Expr {
+  constructor(public object: Expr, public name: Token, public value: Expr) {}
+
+  accept<R>(visitor: ExprVisitor<R>): R {
+    return visitor.visitSetExpr(this);
+  }
+}
