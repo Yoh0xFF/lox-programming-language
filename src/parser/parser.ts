@@ -1,4 +1,4 @@
-import {ParseError} from 'error';
+import { ParseError } from 'error';
 import {
   AssignExpr,
   BinaryExpr,
@@ -24,7 +24,7 @@ import {
   VarStmt,
   WhileStmt,
 } from 'parser/stmt';
-import {Token, TokenType} from 'scanner/token';
+import { Token, TokenType } from 'scanner/token';
 
 export class Parser {
   constructor(

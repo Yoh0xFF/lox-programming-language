@@ -1,5 +1,5 @@
 import { RuntimeError } from 'error';
-import {LoxCallable, LoxFunction} from 'interpreter/callable';
+import { LoxCallable, LoxFunction } from 'interpreter/callable';
 import { Interpreter } from 'interpreter/interpreter';
 import { Token } from 'scanner/token';
 

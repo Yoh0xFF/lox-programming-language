@@ -4,6 +4,7 @@ import { FunctionStmt } from 'parser/stmt';
 
 export interface LoxCallable {
   call(interpreter: Interpreter, args: any[]): any;
+
   arity(): number;
 }
 
