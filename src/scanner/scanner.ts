@@ -1,7 +1,7 @@
 import { Token, TokenType, keywords } from 'scanner/token';
 
 export class Scanner {
-  private source: string;
+  private readonly source: string;
   private tokens: Token[] = [];
   private start = 0;
   private current = 0;
@@ -44,9 +44,6 @@ export class Scanner {
         break;
       case '(':
         this.addToken(TokenType.LEFT_PAREN);
-        break;
-      case ')':
-        this.addToken(TokenType.RIGHT_PAREN);
         break;
       case ')':
         this.addToken(TokenType.RIGHT_PAREN);

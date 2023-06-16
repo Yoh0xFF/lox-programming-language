@@ -1,4 +1,4 @@
-import { ParseError } from 'error';
+import {ParseError} from 'error';
 import {
   AssignExpr,
   BinaryExpr,
@@ -24,7 +24,7 @@ import {
   VarStmt,
   WhileStmt,
 } from 'parser/stmt';
-import { Token, TokenType } from 'scanner/token';
+import {Token, TokenType} from 'scanner/token';
 
 export class Parser {
   constructor(
@@ -163,7 +163,7 @@ export class Parser {
   }
 
   private blockStmt(): BlockStmt {
-    var stmts: Stmt[] = [];
+    let stmts: Stmt[] = [];
 
     while (!this.check(TokenType.RIGHT_BRACE) && !this.isAtEnd()) {
       const stmt = this.declaration();
@@ -262,8 +262,7 @@ export class Parser {
       const value = this.assignment();
 
       if (expr instanceof VariableExpr) {
-        const name = (expr as VariableExpr).name;
-        return new AssignExpr(name, value);
+        return new AssignExpr((expr as VariableExpr).name, value);
       } else if (expr instanceof GetExpr) {
         return new SetExpr(expr.object, expr.name, value);
       }

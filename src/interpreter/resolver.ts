@@ -25,7 +25,7 @@ import {
   WhileStmt,
 } from 'parser/stmt';
 import { ExprVisitor, StmtVisitor } from 'parser/visitor';
-import { Token, TokenType } from 'scanner/token';
+import { Token } from 'scanner/token';
 
 enum FunctionType {
   None = 'NONE',

@@ -2,7 +2,7 @@ import { RuntimeError } from 'error';
 import { Token } from 'scanner/token';
 
 export class Environment {
-  private enclosing?: Environment;
+  private readonly enclosing?: Environment;
   private values = new Map<string, any>();
 
   constructor(enclosing?: Environment) {
