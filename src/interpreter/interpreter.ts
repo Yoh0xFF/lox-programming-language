@@ -74,7 +74,14 @@ export class Interpreter implements StmtVisitor<void>, ExprVisitor<any> {
 
   visitClassStmt(stmt: ClassStmt): void {
     this.env.define(stmt.name.lexeme, undefined);
-    const clazz = new LoxClass(stmt.name.lexeme);
+
+    const methods = new Map<string, LoxFunction>();
+    for (const method of stmt.methods) {
+      const loxFunction = new LoxFunction(method, this.env);
+      methods.set(method.name.lexeme, loxFunction);
+    }
+
+    const clazz = new LoxClass(stmt.name.lexeme, methods);
     this.env.assign(stmt.name, clazz);
   }
 

@@ -1,10 +1,10 @@
 import { RuntimeError } from 'error';
-import { LoxCallable } from 'interpreter/callable';
+import {LoxCallable, LoxFunction} from 'interpreter/callable';
 import { Interpreter } from 'interpreter/interpreter';
 import { Token } from 'scanner/token';
 
 export class LoxClass implements LoxCallable {
-  constructor(public name: string) {}
+  constructor(public name: string, public methods: Map<string, LoxFunction>) {}
 
   call(interpreter: Interpreter, args: any[]) {
     return new LoxInstance(this);
@@ -31,6 +31,10 @@ export class LoxInstance {
   get(name: Token): any {
     if (this.fields.has(name.lexeme)) {
       return this.fields.get(name.lexeme);
+    }
+
+    if (this.clazz.methods.has(name.lexeme)) {
+      return this.clazz.methods.get(name.lexeme);
     }
 
     throw new RuntimeError(name, `Undefined property "${name.lexeme}".`);
