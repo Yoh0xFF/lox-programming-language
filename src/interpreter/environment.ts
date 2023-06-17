@@ -47,6 +47,10 @@ export class Environment {
     return this.ancestor(distance).values.get(name.lexeme);
   }
 
+  getAtByLexeme(distance: number, name: string): any {
+    return this.ancestor(distance).values.get(name);
+  }
+
   private ancestor(distance: number): Environment {
     let env: Environment | undefined = this;
 

@@ -2,6 +2,7 @@ import { Environment } from 'interpreter/environment';
 import { Interpreter } from 'interpreter/interpreter';
 import { FunctionStmt } from 'parser/stmt';
 
+import { TokenType } from '../scanner/token';
 import { LoxInstance } from './class';
 
 export interface LoxCallable {
@@ -13,7 +14,8 @@ export interface LoxCallable {
 export class LoxFunction implements LoxCallable {
   constructor(
     private declaration: FunctionStmt,
-    private closure: Environment
+    private closure: Environment,
+    private isInitializer: boolean = false
   ) {}
 
   call(interpreter: Interpreter, args: any[]) {
@@ -27,17 +29,25 @@ export class LoxFunction implements LoxCallable {
       interpreter.executeBlock(this.declaration.body, env);
     } catch (rslt) {
       if (rslt instanceof Return) {
+        if (this.isInitializer) {
+          return this.closure.getAtByLexeme(0, 'this');
+        }
+
         return rslt.value;
       }
       console.error(rslt);
       throw rslt;
+    }
+
+    if (this.isInitializer) {
+      return this.closure.getAtByLexeme(0, 'this');
     }
   }
 
   bind(instance: LoxInstance): LoxFunction {
     const env = new Environment(this.closure);
     env.define('this', instance);
-    return new LoxFunction(this.declaration, env);
+    return new LoxFunction(this.declaration, env, this.isInitializer);
   }
 
   arity(): number {

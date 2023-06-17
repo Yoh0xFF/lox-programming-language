@@ -7,15 +7,34 @@ export class LoxClass implements LoxCallable {
   constructor(public name: string, public methods: Map<string, LoxFunction>) {}
 
   call(interpreter: Interpreter, args: any[]) {
-    return new LoxInstance(this);
+    const instance = new LoxInstance(this);
+
+    const initializer = this.findMethod('init');
+    if (initializer) {
+      initializer.bind(instance).call(interpreter, args);
+    }
+
+    return instance;
   }
 
   arity(): number {
+    const initializer = this.findMethod('init');
+    if (initializer) {
+      return initializer.arity();
+    }
     return 0;
   }
 
   toString() {
     return `<class ${this.name}>`;
+  }
+
+  findMethod(name: string): LoxFunction | undefined {
+    if (this.methods.has(name)) {
+      return this.methods.get(name);
+    }
+
+    return undefined;
   }
 }
 

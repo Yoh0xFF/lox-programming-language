@@ -31,6 +31,7 @@ import { Token } from 'scanner/token';
 enum FunctionType {
   None = 'NONE',
   Function = 'FUNCTION',
+  Initializer = 'INITIALIZER',
   Method = 'METHOD',
 }
 
@@ -99,7 +100,13 @@ export class Resolver implements ExprVisitor<void>, StmtVisitor<void> {
     this.scopes[this.scopes.length - 1].set('this', true);
 
     for (const method of stmt.methods) {
-      this.resolveFunction(method, FunctionType.Method);
+      let declaration = FunctionType.Method;
+
+      if (method.name.lexeme === 'init') {
+        declaration = FunctionType.Initializer;
+      }
+
+      this.resolveFunction(method, declaration);
     }
 
     this.endScope();
@@ -154,6 +161,13 @@ export class Resolver implements ExprVisitor<void>, StmtVisitor<void> {
     }
 
     if (stmt.value) {
+      if (this.currentFunctionType == FunctionType.Initializer) {
+        this.reportResolverError(
+          stmt.keyword,
+          "Can't return a value from an initializer."
+        );
+      }
+
       this.resolveExpr(stmt.value);
     }
   }
