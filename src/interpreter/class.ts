@@ -34,7 +34,7 @@ export class LoxInstance {
     }
 
     if (this.clazz.methods.has(name.lexeme)) {
-      return this.clazz.methods.get(name.lexeme);
+      return this.clazz.methods.get(name.lexeme)?.bind(this);
     }
 
     throw new RuntimeError(name, `Undefined property "${name.lexeme}".`);

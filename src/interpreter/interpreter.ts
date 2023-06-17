@@ -12,6 +12,7 @@ import {
   LiteralExpr,
   LogicalExpr,
   SetExpr,
+  ThisExpr,
   UnaryExpr,
   VariableExpr,
 } from 'parser/expr';
@@ -241,6 +242,10 @@ export class Interpreter implements StmtVisitor<void>, ExprVisitor<any> {
     }
 
     throw new RuntimeError(expr.name, 'Only instances have fields');
+  }
+
+  visitThisExpr(expr: ThisExpr): any {
+    return this.lookupVarable(expr.keyword, expr);
   }
 
   visitUnaryExpr(expr: UnaryExpr): any {

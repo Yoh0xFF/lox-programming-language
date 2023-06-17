@@ -2,6 +2,8 @@ import { Environment } from 'interpreter/environment';
 import { Interpreter } from 'interpreter/interpreter';
 import { FunctionStmt } from 'parser/stmt';
 
+import { LoxInstance } from './class';
+
 export interface LoxCallable {
   call(interpreter: Interpreter, args: any[]): any;
 
@@ -30,6 +32,12 @@ export class LoxFunction implements LoxCallable {
       console.error(rslt);
       throw rslt;
     }
+  }
+
+  bind(instance: LoxInstance): LoxFunction {
+    const env = new Environment(this.closure);
+    env.define('this', instance);
+    return new LoxFunction(this.declaration, env);
   }
 
   arity(): number {

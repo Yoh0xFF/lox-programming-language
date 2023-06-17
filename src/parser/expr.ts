@@ -86,3 +86,11 @@ export class SetExpr implements Expr {
     return visitor.visitSetExpr(this);
   }
 }
+
+export class ThisExpr implements Expr {
+  constructor(public keyword: Token) {}
+
+  accept<R>(visitor: ExprVisitor<R>): R {
+    return visitor.visitThisExpr(this);
+  }
+}

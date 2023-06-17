@@ -9,6 +9,7 @@ import {
   LiteralExpr,
   LogicalExpr,
   SetExpr,
+  ThisExpr,
   UnaryExpr,
   VariableExpr,
 } from 'parser/expr';
@@ -33,9 +34,15 @@ enum FunctionType {
   Method = 'METHOD',
 }
 
+enum ClassType {
+  None = 'NONE',
+  Class = 'CLASS',
+}
+
 export class Resolver implements ExprVisitor<void>, StmtVisitor<void> {
   private scopes: Map<string, boolean>[] = [];
   private currentFunctionType = FunctionType.None;
+  private currentClassType = ClassType.None;
   public hadError = false;
 
   constructor(private interpreter: Interpreter) {}
@@ -85,13 +92,19 @@ export class Resolver implements ExprVisitor<void>, StmtVisitor<void> {
   }
 
   visitClassStmt(stmt: ClassStmt): void {
+    const enclosingClassType = this.currentClassType;
+    this.currentClassType = ClassType.Class;
     this.declare(stmt.name);
+    this.beginScope();
+    this.scopes[this.scopes.length - 1].set('this', true);
 
     for (const method of stmt.methods) {
       this.resolveFunction(method, FunctionType.Method);
     }
 
+    this.endScope();
     this.define(stmt.name);
+    this.currentClassType = enclosingClassType;
   }
 
   visitFunctionStmt(stmt: FunctionStmt) {
@@ -170,6 +183,18 @@ export class Resolver implements ExprVisitor<void>, StmtVisitor<void> {
   visitSetExpr(expr: SetExpr): void {
     this.resolveExpr(expr.value);
     this.resolveExpr(expr.object);
+  }
+
+  visitThisExpr(expr: ThisExpr): void {
+    if (this.currentClassType == ClassType.None) {
+      this.reportResolverError(
+        expr.keyword,
+        "Can't use 'this' outside of a class."
+      );
+      return;
+    }
+
+    this.resolveLocal(expr, expr.keyword);
   }
 
   visitGroupingExpr(expr: GroupingExpr) {
