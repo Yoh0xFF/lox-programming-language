@@ -2,7 +2,6 @@ import { Environment } from 'interpreter/environment';
 import { Interpreter } from 'interpreter/interpreter';
 import { FunctionStmt } from 'parser/stmt';
 
-import { TokenType } from '../scanner/token';
 import { LoxInstance } from './class';
 
 export interface LoxCallable {
@@ -27,16 +26,16 @@ export class LoxFunction implements LoxCallable {
 
     try {
       interpreter.executeBlock(this.declaration.body, env);
-    } catch (rslt) {
-      if (rslt instanceof Return) {
+    } catch (result) {
+      if (result instanceof Return) {
         if (this.isInitializer) {
           return this.closure.getAtByLexeme(0, 'this');
         }
 
-        return rslt.value;
+        return result.value;
       }
-      console.error(rslt);
-      throw rslt;
+      console.error(result);
+      throw result;
     }
 
     if (this.isInitializer) {

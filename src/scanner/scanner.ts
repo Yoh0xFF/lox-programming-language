@@ -173,7 +173,7 @@ export class Scanner {
     }
 
     if (this.isAtEnd()) {
-      this.reportScannerError(this.line, 'Unterminates string');
+      this.reportScannerError(this.line, 'Unterminated string');
       return;
     }
 

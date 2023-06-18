@@ -249,7 +249,7 @@ export class Interpreter implements StmtVisitor<void>, ExprVisitor<any> {
   }
 
   visitThisExpr(expr: ThisExpr): any {
-    return this.lookupVarable(expr.keyword, expr);
+    return this.lookupVariable(expr.keyword, expr);
   }
 
   visitUnaryExpr(expr: UnaryExpr): any {
@@ -275,10 +275,10 @@ export class Interpreter implements StmtVisitor<void>, ExprVisitor<any> {
   }
 
   visitVariableExpr(expr: VariableExpr): any {
-    return this.lookupVarable(expr.name, expr);
+    return this.lookupVariable(expr.name, expr);
   }
 
-  private lookupVarable(name: Token, expr: Expr) {
+  private lookupVariable(name: Token, expr: Expr) {
     const distance = this.locals.get(expr);
     if (distance != null) {
       return this.env.getAt(distance, name);
