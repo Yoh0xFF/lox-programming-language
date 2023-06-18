@@ -9,6 +9,7 @@ import {
   LiteralExpr,
   LogicalExpr,
   SetExpr,
+  SuperExpr,
   ThisExpr,
   UnaryExpr,
   VariableExpr,
@@ -425,6 +426,15 @@ export class Parser {
     }
     if (this.match(TokenType.THIS)) {
       return new ThisExpr(this.previous());
+    }
+    if (this.match(TokenType.SUPER)) {
+      const keyword = this.previous();
+      this.consume(TokenType.DOT, "Expect '.' after 'super'.");
+      const method = this.consume(
+        TokenType.IDENTIFIER,
+        'Expect superclass method name.'
+      );
+      return new SuperExpr(keyword, method);
     }
     if (this.match(TokenType.IDENTIFIER)) {
       return new VariableExpr(this.previous());

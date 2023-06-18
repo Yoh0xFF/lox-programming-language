@@ -12,6 +12,7 @@ import {
   LiteralExpr,
   LogicalExpr,
   SetExpr,
+  SuperExpr,
   ThisExpr,
   UnaryExpr,
   VariableExpr,
@@ -87,6 +88,11 @@ export class Interpreter implements StmtVisitor<void>, ExprVisitor<any> {
 
     this.env.define(stmt.name.lexeme, undefined);
 
+    if (superclass) {
+      this.env = new Environment(this.env);
+      this.env.define('super', superclass);
+    }
+
     const methods = new Map<string, LoxFunction>();
     for (const method of stmt.methods) {
       const loxFunction = new LoxFunction(
@@ -98,6 +104,9 @@ export class Interpreter implements StmtVisitor<void>, ExprVisitor<any> {
     }
 
     const clazz = new LoxClass(stmt.name.lexeme, superclass, methods);
+    if (superclass) {
+      this.env = this.env.enclosing!;
+    }
     this.env.assign(stmt.name, clazz);
   }
 
@@ -261,6 +270,22 @@ export class Interpreter implements StmtVisitor<void>, ExprVisitor<any> {
 
   visitThisExpr(expr: ThisExpr): any {
     return this.lookupVariable(expr.keyword, expr);
+  }
+
+  visitSuperExpr(expr: SuperExpr): any {
+    const distance = this.locals.get(expr)!;
+    const superclass = this.env.getAtByLexeme(distance, 'super') as LoxClass;
+
+    const object = this.env.getAtByLexeme(distance - 1, 'this') as LoxInstance;
+
+    const method = superclass.findMethod(expr.method.lexeme);
+    if (!method) {
+      throw new RuntimeError(
+        expr.method,
+        `Undefined property '${expr.method.lexeme}'.`
+      );
+    }
+    return method.bind(object);
   }
 
   visitUnaryExpr(expr: UnaryExpr): any {

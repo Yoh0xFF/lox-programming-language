@@ -9,6 +9,7 @@ import {
   LiteralExpr,
   LogicalExpr,
   SetExpr,
+  SuperExpr,
   ThisExpr,
   UnaryExpr,
   VariableExpr,
@@ -109,6 +110,8 @@ export class Resolver implements ExprVisitor<void>, StmtVisitor<void> {
     }
     if (stmt.superclass) {
       this.resolveExpr(stmt.superclass);
+      this.beginScope();
+      this.scopes[this.scopes.length - 1].set('super', true);
     }
 
     this.beginScope();
@@ -125,6 +128,11 @@ export class Resolver implements ExprVisitor<void>, StmtVisitor<void> {
     }
 
     this.endScope();
+
+    if (stmt.superclass) {
+      this.endScope();
+    }
+
     this.currentClassType = enclosingClassType;
   }
 
@@ -222,6 +230,10 @@ export class Resolver implements ExprVisitor<void>, StmtVisitor<void> {
       return;
     }
 
+    this.resolveLocal(expr, expr.keyword);
+  }
+
+  visitSuperExpr(expr: SuperExpr): void {
     this.resolveLocal(expr, expr.keyword);
   }
 

@@ -94,3 +94,11 @@ export class ThisExpr implements Expr {
     return visitor.visitThisExpr(this);
   }
 }
+
+export class SuperExpr implements Expr {
+  constructor(public keyword: Token, public method: Token) {}
+
+  accept<R>(visitor: ExprVisitor<R>): R {
+    return visitor.visitSuperExpr(this);
+  }
+}
