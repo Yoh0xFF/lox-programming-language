@@ -74,6 +74,17 @@ export class Interpreter implements StmtVisitor<void>, ExprVisitor<any> {
   }
 
   visitClassStmt(stmt: ClassStmt): void {
+    let superclass = undefined;
+    if (stmt.superclass) {
+      superclass = this.evaluate(stmt.superclass);
+      if (!(superclass instanceof LoxClass)) {
+        throw new RuntimeError(
+          stmt.superclass.name,
+          'Superclass must be a class.'
+        );
+      }
+    }
+
     this.env.define(stmt.name.lexeme, undefined);
 
     const methods = new Map<string, LoxFunction>();
@@ -86,7 +97,7 @@ export class Interpreter implements StmtVisitor<void>, ExprVisitor<any> {
       methods.set(method.name.lexeme, loxFunction);
     }
 
-    const clazz = new LoxClass(stmt.name.lexeme, methods);
+    const clazz = new LoxClass(stmt.name.lexeme, superclass, methods);
     this.env.assign(stmt.name, clazz);
   }
 

@@ -4,7 +4,11 @@ import { Interpreter } from 'interpreter/interpreter';
 import { Token } from 'scanner/token';
 
 export class LoxClass implements LoxCallable {
-  constructor(public name: string, public methods: Map<string, LoxFunction>) {}
+  constructor(
+    public name: string,
+    public superclass: LoxClass | undefined,
+    public methods: Map<string, LoxFunction>
+  ) {}
 
   call(interpreter: Interpreter, args: any[]) {
     const instance = new LoxInstance(this);
@@ -34,6 +38,10 @@ export class LoxClass implements LoxCallable {
       return this.methods.get(name);
     }
 
+    if (this.superclass) {
+      return this.superclass.findMethod(name);
+    }
+
     return undefined;
   }
 }
@@ -52,8 +60,9 @@ export class LoxInstance {
       return this.fields.get(name.lexeme);
     }
 
-    if (this.clazz.methods.has(name.lexeme)) {
-      return this.clazz.methods.get(name.lexeme)?.bind(this);
+    const method = this.clazz.findMethod(name.lexeme);
+    if (method) {
+      return method.bind(this);
     }
 
     throw new RuntimeError(name, `Undefined property "${name.lexeme}".`);

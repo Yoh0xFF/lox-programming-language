@@ -1,4 +1,4 @@
-import { Expr } from 'parser/expr';
+import { Expr, VariableExpr } from 'parser/expr';
 import { StmtVisitor } from 'parser/visitor';
 import { Token } from 'scanner/token';
 
@@ -23,7 +23,11 @@ export class ExprStmt implements Stmt {
 }
 
 export class ClassStmt implements Stmt {
-  constructor(public name: Token, public methods: FunctionStmt[]) {}
+  constructor(
+    public name: Token,
+    public superclass: VariableExpr | undefined,
+    public methods: FunctionStmt[]
+  ) {}
 
   accept<R>(visitor: StmtVisitor<R>): R {
     return visitor.visitClassStmt(this);
